@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUKia — Admin Console</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-primary:#ffffff;--bg-secondary:#f5f5f3;--bg-tertiary:#eeede9;
+    --text-primary:#1a1a18;--text-secondary:#6b6b67;--text-tertiary:#9e9e9a;
+    --border-light:rgba(0,0,0,0.08);--border-mid:rgba(0,0,0,0.14);--border-strong:rgba(0,0,0,0.22);
+    --green-bg:#FEF3DC;--green-light:#FBDFA0;--green-mid:#F59D0D;
+    --green-dark:#F59D0D;--green-deep:#C47D00;
+    --amber-bg:#FAEEDA;--amber-mid:#EF9F27;--amber-dark:#633806;
+    --red-bg:#FCEBEB;--red-mid:#D85A30;--red-dark:#501313;
+    --blue-bg:#E6F1FB;--blue-mid:#378ADD;--blue-dark:#185FA5;
+    --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+    --shadow-sm:0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  /* ── DARK MODE ─────────────────────────────────────────────────── */
+  html.dark {
+    --bg-primary:#1c1c1a;
+    --bg-secondary:#242422;
+    --bg-tertiary:#141412;
+    --text-primary:#f0efe9;
+    --text-secondary:#a8a8a2;
+    --text-tertiary:#6b6b66;
+    --border-light:rgba(255,255,255,0.06);
+    --border-mid:rgba(255,255,255,0.10);
+    --border-strong:rgba(255,255,255,0.18);
+    --green-bg:#2a1f08;
+    --green-light:#3d2e0c;
+    --green-mid:#F59D0D;
+    --green-dark:#F59D0D;
+    --green-deep:#fbb63a;
+    --amber-bg:#2a1f08;
+    --amber-mid:#EF9F27;
+    --amber-dark:#fac96a;
+    --red-bg:#2a0e0e;
+    --red-mid:#D85A30;
+    --red-dark:#f08060;
+    --blue-bg:#0c1f33;
+    --blue-mid:#378ADD;
+    --blue-dark:#5ba3f0;
+  }
+
+  html.dark .topbar,
+  html.dark .sidebar,
+  html.dark .body-wrap {background:var(--bg-primary);}
+  html.dark tbody tr:hover td {background:var(--bg-secondary);}
+  html.dark .prompt-item:hover {background:var(--bg-secondary);}
+  html.dark #user-menu {background:var(--bg-primary);border-color:var(--border-mid);}
+  html.dark .modal-bg > div {background:var(--bg-primary);}
+
+  /* Dark toggle */
+  .dark-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+  .dark-toggle-track{width:34px;height:19px;border-radius:10px;background:var(--border-mid);position:relative;transition:background .2s;flex-shrink:0;border:0.5px solid var(--border-mid);}
+  .dark-toggle-track.on{background:var(--green-mid);border-color:var(--green-mid);}
+  .dark-toggle-thumb{position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+  .dark-toggle-track.on .dark-toggle-thumb{transform:translateX(15px);}
+
+  html,body{height:100%;font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--bg-tertiary);color:var(--text-primary);font-size:13px;line-height:1.5;}
+  .shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+  .topbar{display:flex;align-items:center;padding:0 20px;height:48px;background:var(--bg-primary);border-bottom:0.5px solid var(--border-mid);flex-shrink:0;gap:24px;}
+  .logo{font-size:16px;font-weight:600;letter-spacing:-0.3px;flex-shrink:0;}
+  .logo em{color:var(--green-dark);font-style:normal;}
+  .logo span{font-size:11px;font-weight:400;color:var(--text-tertiary);margin-left:6px;}
+  .top-nav{display:flex;gap:2px;flex:1;}
+  .top-nav-item{padding:5px 12px;font-size:12px;color:var(--text-secondary);cursor:pointer;border-radius:var(--radius-md);transition:background .12s,color .12s;white-space:nowrap;}
+  .top-nav-item:hover{background:var(--bg-secondary);color:var(--text-primary);}
+  .top-nav-item.active{background:var(--bg-secondary);color:var(--text-primary);font-weight:500;}
+  .top-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+  .badge-alert{background:var(--red-bg);color:var(--red-dark);font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;}
+  .admin-pill{display:flex;align-items:center;gap:7px;cursor:pointer;position:relative;}
+  .admin-name{font-size:12px;color:var(--text-secondary);}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--green-deep);flex-shrink:0;}
+  .body-wrap{display:flex;flex:1;overflow:hidden;}
+  .sidebar{width:196px;background:var(--bg-primary);border-right:0.5px solid var(--border-light);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+  .sb-section{padding:14px 14px 4px;font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.7px;font-weight:500;}
+  .sb-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:background .1s;border-left:2px solid transparent;}
+  .sb-item:hover{background:var(--bg-secondary);color:var(--text-primary);}
+  .sb-item.active{background:var(--bg-secondary);color:var(--text-primary);font-weight:500;border-left-color:var(--green-dark);}
+  .sb-icon{width:16px;font-size:12px;flex-shrink:0;text-align:center;}
+  .sb-badge{margin-left:auto;font-size:10px;background:var(--red-bg);color:var(--red-dark);padding:1px 5px;border-radius:8px;font-weight:600;}
+  .sb-bottom{margin-top:auto;border-top:0.5px solid var(--border-light);padding:12px 14px;}
+  .main{flex:1;overflow-y:auto;background:var(--bg-tertiary);}
+  .page{display:none;padding:22px 24px;}
+  .page.active{display:block;}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+  .page-title{font-size:16px;font-weight:600;}
+  .page-sub{font-size:12px;color:var(--text-tertiary);margin-top:3px;}
+  .hdr-actions{display:flex;gap:8px;}
+  .btn{padding:6px 14px;border-radius:var(--radius-md);font-size:12px;font-family:inherit;cursor:pointer;transition:opacity .12s;border:0.5px solid var(--border-mid);background:var(--bg-primary);color:var(--text-secondary);}
+  .btn:hover{opacity:.8;}
+  .btn:disabled{opacity:.4;cursor:default;}
+  .btn-primary{background:var(--green-dark);color:#fff;border-color:var(--green-dark);}
+  .btn-danger{border-color:var(--red-mid);color:#993C1D;}
+  .btn-green{border-color:var(--green-mid);color:var(--green-deep);}
+  .card{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-lg);padding:16px 18px;}
+  .card-title{font-size:13px;font-weight:500;padding-bottom:12px;border-bottom:0.5px solid var(--border-light);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+  .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+  .metric{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:14px 16px;}
+  .metric-label{font-size:11px;color:var(--text-tertiary);margin-bottom:5px;}
+  .metric-val{font-size:22px;font-weight:600;line-height:1.1;}
+  .metric-sub{font-size:11px;color:var(--text-secondary);margin-top:4px;}
+  .table-wrap{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;}
+  table{width:100%;border-collapse:collapse;}
+  thead th{padding:9px 14px;font-size:11px;font-weight:500;color:var(--text-secondary);text-align:left;background:var(--bg-secondary);border-bottom:0.5px solid var(--border-light);white-space:nowrap;}
+  tbody td{padding:10px 14px;font-size:12px;border-bottom:0.5px solid var(--border-light);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:#fafaf8;}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap;}
+  .badge-active{background:var(--green-bg);color:var(--green-deep);}
+  .badge-warn{background:var(--amber-bg);color:var(--amber-dark);}
+  .badge-limit{background:var(--red-bg);color:var(--red-dark);}
+  .badge-pause{background:var(--bg-secondary);color:var(--text-secondary);}
+  .badge-info{background:var(--blue-bg);color:var(--blue-dark);}
+  .badge-ok{background:var(--green-bg);color:var(--green-deep);}
+  .plan-badge{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:500;}
+  .plan-basic{background:var(--bg-secondary);color:var(--text-secondary);}
+  .plan-pro{background:var(--blue-bg);color:var(--blue-dark);}
+  .plan-ent{background:var(--green-bg);color:var(--green-deep);}
+  .pbar{display:inline-flex;align-items:center;gap:6px;}
+  .pbar-track{width:80px;height:5px;background:var(--bg-secondary);border-radius:3px;overflow:hidden;}
+  .pbar-fill{height:100%;border-radius:3px;}
+  .pbar-green{background:var(--green-mid);}.pbar-amber{background:var(--amber-mid);}.pbar-red{background:var(--red-mid);}
+  .form-row{display:grid;gap:12px;}
+  .form-row-2{grid-template-columns:1fr 1fr;}.form-row-3{grid-template-columns:1fr 1fr 1fr;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-label{font-size:11px;color:var(--text-secondary);}
+  .form-input,.form-select,.form-textarea{padding:7px 10px;border:0.5px solid var(--border-mid);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-primary);color:var(--text-primary);outline:none;width:100%;transition:border-color .12s;}
+  .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green-mid);}
+  .form-textarea{resize:none;line-height:1.6;}
+  .form-hint{font-size:10px;color:var(--text-tertiary);}
+  .search-bar{padding:7px 10px 7px 32px;border:0.5px solid var(--border-mid);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-secondary);color:var(--text-primary);outline:none;width:260px;}
+  .search-wrap{position:relative;}
+  .search-wrap::before{content:'⌕';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-tertiary);pointer-events:none;}
+  .filter-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;}
+  .toggle-group{display:flex;flex-direction:column;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--border-light);}
+  .toggle-row:last-child{border-bottom:none;}
+  .toggle-info .tl{font-size:12px;color:var(--text-primary);}
+  .toggle-info .ts{font-size:11px;color:var(--text-tertiary);margin-top:1px;}
+  .toggle{width:32px;height:18px;border-radius:9px;background:var(--green-mid);position:relative;cursor:pointer;flex-shrink:0;}
+  .toggle.off{background:var(--bg-secondary);border:0.5px solid var(--border-mid);}
+  .toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;right:2px;box-shadow:var(--shadow-sm);}
+  .toggle.off::after{right:auto;left:2px;background:var(--text-tertiary);box-shadow:none;}
+  .row-acts{display:flex;gap:4px;}
+  .act{padding:3px 8px;border:0.5px solid var(--border-mid);border-radius:6px;font-size:11px;color:var(--text-secondary);background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;}
+  .act:hover{background:var(--bg-secondary);}
+  .act.green{border-color:var(--green-mid);color:var(--green-deep);}
+  .act.red{border-color:var(--red-mid);color:#993C1D;}
+  .pagination{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-secondary);}
+  .pag-btns{display:flex;gap:4px;}
+  .pag-btn{padding:4px 10px;border:0.5px solid var(--border-mid);border-radius:var(--radius-md);font-size:11px;background:var(--bg-primary);cursor:pointer;color:var(--text-secondary);font-family:inherit;}
+  .pag-btn.active{background:var(--bg-secondary);font-weight:500;color:var(--text-primary);}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .usage-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .usage-name{font-size:12px;width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+  .usage-track{flex:1;height:7px;background:var(--bg-secondary);border-radius:4px;overflow:hidden;}
+  .usage-fill{height:100%;border-radius:4px;}
+  .usage-val{font-size:11px;color:var(--text-secondary);width:36px;text-align:right;flex-shrink:0;}
+  .pct-pill{font-size:10px;padding:2px 6px;border-radius:6px;}
+  .pct-ok{background:var(--green-bg);color:var(--green-deep);}
+  .pct-mid{background:var(--amber-bg);color:var(--amber-dark);}
+  .pct-hi{background:var(--red-bg);color:var(--red-dark);}
+  .alert-item{display:flex;gap:10px;padding:10px 12px;border-radius:var(--radius-md);margin-bottom:8px;align-items:flex-start;}
+  .alert-item:last-child{margin-bottom:0;}
+  .alert-red{background:var(--red-bg);border:0.5px solid #F09595;}
+  .alert-amber{background:var(--amber-bg);border:0.5px solid #FAC775;}
+  .alert-blue{background:var(--blue-bg);border:0.5px solid #B5D4F4;}
+  .alert-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+  .alert-body{flex:1;font-size:12px;line-height:1.5;}
+  .alert-act{margin-left:auto;flex-shrink:0;}
+  .log-badge{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600;flex-shrink:0;white-space:nowrap;}
+  .lb-ok{background:var(--green-bg);color:var(--green-deep);}
+  .lb-warn{background:var(--amber-bg);color:var(--amber-dark);}
+  .lb-error{background:var(--red-bg);color:var(--red-dark);}
+  .lb-info{background:var(--blue-bg);color:var(--blue-dark);}
+  .lb-config{background:#EDE9FE;color:#4C1D95;}
+  .with-drawer{position:relative;overflow:hidden;}
+  .drawer{position:absolute;top:0;right:0;bottom:0;width:340px;background:var(--bg-primary);border-left:0.5px solid var(--border-mid);padding:18px 20px;overflow-y:auto;z-index:20;transform:translateX(100%);transition:transform .22s ease;}
+  .drawer.open{transform:translateX(0);}
+  .drawer-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .drawer-title{font-size:14px;font-weight:600;}
+  .close-btn{width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border-mid);background:transparent;cursor:pointer;font-size:13px;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;}
+  .stat-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;}
+  .stat-mini{text-align:center;}
+  .stat-v{font-size:17px;font-weight:600;}
+  .stat-l{font-size:10px;color:var(--text-tertiary);margin-top:2px;}
+  .section-line{border:none;border-top:0.5px solid var(--border-light);margin:14px 0;}
+  .connector-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:0.5px solid var(--border-light);border-radius:var(--radius-md);margin-bottom:6px;}
+  .conn-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .cdot-on{background:var(--green-mid);}.cdot-off{background:var(--text-tertiary);}
+  .drawer-footer{display:flex;gap:8px;margin-top:18px;}
+  .btn-full{flex:1;padding:8px;border-radius:var(--radius-md);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;}
+  .btn-cancel{border:0.5px solid var(--border-mid);background:transparent;color:var(--text-secondary);}
+  .btn-save{border:none;background:var(--green-dark);color:#fff;}
+  .prompts-layout{display:flex;background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden;min-height:560px;}
+  .prompts-list{width:280px;border-right:0.5px solid var(--border-light);display:flex;flex-direction:column;flex-shrink:0;}
+  .pl-header{padding:14px 14px 10px;border-bottom:0.5px solid var(--border-light);}
+  .pl-title{font-size:13px;font-weight:500;margin-bottom:8px;}
+  .cats{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;}
+  .cat{padding:3px 9px;border-radius:10px;font-size:10px;font-weight:500;cursor:pointer;border:0.5px solid var(--border-mid);color:var(--text-secondary);background:transparent;transition:all .1s;}
+  .cat.active{background:var(--green-dark);color:#fff;border-color:var(--green-dark);}
+  .pl-scroll{flex:1;overflow-y:auto;}
+  .new-prompt-btn{margin:10px 12px;padding:8px;border:0.5px dashed var(--border-mid);border-radius:var(--radius-md);font-size:11px;color:var(--text-tertiary);text-align:center;cursor:pointer;}
+  .new-prompt-btn:hover{background:var(--bg-secondary);color:var(--text-secondary);}
+  .prompt-item{padding:11px 14px;border-bottom:0.5px solid var(--border-light);cursor:pointer;transition:background .1s;}
+  .prompt-item:hover{background:#fafaf8;}
+  .prompt-item.active{background:var(--bg-secondary);border-left:2px solid var(--green-dark);}
+  .pi-hd{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+  .pi-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .pi-dot-on{background:var(--green-mid);}.pi-dot-off{background:var(--border-mid);}
+  .pi-title{font-size:12px;font-weight:500;}
+  .pi-title.muted{color:var(--text-secondary);}
+  .pi-preview{font-size:11px;color:var(--text-secondary);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .pi-meta{display:flex;gap:5px;margin-top:5px;align-items:center;}
+  .ptag{padding:2px 6px;border-radius:6px;font-size:10px;}
+  .ptag-ventas{background:var(--green-bg);color:var(--green-deep);}
+  .ptag-finanzas{background:var(--blue-bg);color:var(--blue-dark);}
+  .ptag-rrhh{background:#FBEAF0;color:#72243E;}
+  .ptag-ops{background:var(--amber-bg);color:var(--amber-dark);}
+  .ptag-gen,.ptag-general{background:var(--bg-secondary);color:var(--text-secondary);}
+  .prompt-editor{flex:1;padding:18px 22px;overflow-y:auto;}
+  .pe-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .pe-title{font-size:14px;font-weight:600;}
+  .pe-acts{display:flex;gap:6px;}
+  .pe-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+  .pe-stat{background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 12px;}
+  .pe-stat-v{font-size:18px;font-weight:600;}
+  .pe-stat-l{font-size:10px;color:var(--text-tertiary);margin-top:2px;}
+  .config-layout{display:flex;background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden;min-height:540px;}
+  .config-nav{width:170px;border-right:0.5px solid var(--border-light);padding:12px 0;flex-shrink:0;}
+  .cn-section{padding:12px 14px 4px;font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.6px;font-weight:500;}
+  .cn-item{padding:7px 14px;font-size:12px;color:var(--text-secondary);cursor:pointer;border-left:2px solid transparent;transition:all .1s;}
+  .cn-item:hover{background:var(--bg-secondary);}
+  .cn-item.active{color:var(--text-primary);font-weight:500;border-left-color:var(--green-dark);background:var(--bg-secondary);}
+  .config-content{flex:1;padding:20px 24px;overflow-y:auto;}
+  .model-option{border:0.5px solid var(--border-mid);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .1s;}
+  .model-option.sel{border-color:var(--green-mid);background:rgba(245,157,13,0.06);}
+  .radio{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-mid);flex-shrink:0;margin-right:10px;position:relative;}
+  .radio.checked{border-color:var(--green-dark);background:var(--green-dark);}
+  .radio.checked::after{content:'';position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;top:50%;left:50%;transform:translate(-50%,-50%);}
+  .model-desc{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+  .model-price{font-size:11px;color:var(--text-tertiary);text-align:right;}
+  .model-price strong{display:block;font-weight:600;color:var(--text-primary);font-size:12px;}
+  .api-key-row{display:flex;gap:8px;align-items:center;}
+  .api-key-field{flex:1;padding:7px 10px;border:0.5px solid var(--border-mid);border-radius:var(--radius-md);font-size:11px;font-family:monospace;background:var(--bg-secondary);color:var(--text-secondary);}
+  .status-ok{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--green-deep);background:var(--green-bg);padding:4px 10px;border-radius:10px;}
+  .sok-dot{width:6px;height:6px;border-radius:50%;background:var(--green-mid);}
+  .feed-row{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border-light);font-size:12px;align-items:flex-start;}
+  .feed-row:last-child{border-bottom:none;}
+  .feed-dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+  .feed-text{flex:1;line-height:1.5;}
+  .feed-time{font-size:10px;color:var(--text-tertiary);flex-shrink:0;}
+  ::-webkit-scrollbar{width:5px;height:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:3px;}
+  @media(max-width:900px){.metrics-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="logo">QU<em>Ki</em>a <span>Admin Console · Cookdata</span></div>
+    <nav class="top-nav">
+      <div class="top-nav-item active" onclick="navigate('dashboard',this)">Dashboard</div>
+      <div class="top-nav-item" onclick="navigate('clientes',this)">Clientes</div>
+      <div class="top-nav-item" onclick="navigate('tokens',this)">Facturación / Tokens</div>
+      <div class="top-nav-item" onclick="navigate('prompts',this)">Prompts</div>
+      <div class="top-nav-item" onclick="navigate('config',this)">Configuración</div>
+      <div class="top-nav-item" onclick="navigate('logs',this)">Logs</div>
+    </nav>
+    <div class="top-right">
+      <span class="badge-alert" id="alertas-badge-top">—</span>
+      <div class="admin-pill" onclick="toggleUserMenu()">
+        <span class="admin-name" id="topbar-email">—</span>
+        <div class="avatar" id="topbar-avatar">—</div>
+        <div id="user-menu" style="display:none;position:absolute;top:38px;right:0;background:#fff;border:0.5px solid rgba(0,0,0,0.14);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);min-width:200px;z-index:1000;">
+          <div style="padding:10px 14px;font-size:11px;color:#6b6b67;border-bottom:0.5px solid rgba(0,0,0,0.08);" id="menu-email">—</div>
+          <div style="padding:9px 14px 5px;font-size:11px;color:var(--text-tertiary)">Apariencia</div>
+          <div style="padding:5px 14px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid rgba(0,0,0,0.06)">
+            <span style="font-size:12px">Modo oscuro</span>
+            <div class="dark-toggle" onclick="event.stopPropagation();toggleDark()">
+              <div class="dark-toggle-track" id="dark-track"><div class="dark-toggle-thumb"></div></div>
+            </div>
+          </div>
+          <div style="padding:9px 14px;font-size:12px;cursor:pointer;" onmouseenter="this.style.background='#f5f5f3'" onmouseleave="this.style.background=''" onclick="navigate('config')">Configuración</div>
+          <div style="padding:9px 14px;font-size:12px;color:#D85A30;cursor:pointer;border-top:0.5px solid rgba(0,0,0,0.06);" onmouseenter="this.style.background='#f5f5f3'" onmouseleave="this.style.background=''" onclick="logout()">Cerrar sesión</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="body-wrap">
+    <aside class="sidebar">
+      <div class="sb-section">General</div>
+      <div class="sb-item active" onclick="navigate('dashboard',null,this)"><span class="sb-icon">⊞</span>Dashboard</div>
+      <div class="sb-item" onclick="navigate('clientes',null,this)"><span class="sb-icon">◻</span>Clientes activos</div>
+      <div class="sb-item" onclick="navigate('conectores',null,this)"><span class="sb-icon">⊡</span>Conectores PBI</div>
+      <div class="sb-section">Consumo IA</div>
+      <div class="sb-item" onclick="navigate('tokens',null,this)"><span class="sb-icon">◈</span>Token meter</div>
+      <div class="sb-item" onclick="navigate('alertas',null,this)"><span class="sb-icon">◉</span>Alertas límite<span class="sb-badge" id="alertas-badge">—</span></div>
+      <div class="sb-item" onclick="navigate('tokens',null,this)"><span class="sb-icon">◎</span>Coste Claude API</div>
+      <div class="sb-section">Contenido</div>
+      <div class="sb-item" onclick="navigate('prompts',null,this)"><span class="sb-icon">◫</span>Prompts globales</div>
+      <div class="sb-section">Sistema</div>
+      <div class="sb-item" onclick="navigate('logs',null,this)"><span class="sb-icon">≡</span>Logs auditoría</div>
+      <div class="sb-item" onclick="navigate('config',null,this)"><span class="sb-icon">⚙</span>Ajustes API</div>
+      <div class="sb-bottom">
+        <div class="dark-toggle" onclick="toggleDark()" title="Modo oscuro" style="justify-content:space-between;width:100%">
+          <span style="font-size:11px;color:var(--text-tertiary)">Modo oscuro</span>
+          <div class="dark-toggle-track" id="dark-track-sb"><div class="dark-toggle-thumb"></div></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div><div class="page-title">Dashboard</div><div class="page-sub" id="dashboard-date">Cargando...</div></div>
+          <div class="hdr-actions">
+            <button class="btn" onclick="exportDashboard()">Exportar informe</button>
+            <button class="btn btn-primary" onclick="openNewTenantModal()">+ Nuevo cliente</button>
+          </div>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric"><div class="metric-label">Clientes activos</div><div class="metric-val" id="m-active-tenants">—</div><div class="metric-sub" id="m-active-tenants-sub">cargando...</div></div>
+          <div class="metric"><div class="metric-label">Modelos PBI conectados</div><div class="metric-val" id="m-total-models">—</div><div class="metric-sub" id="m-total-users-sub">cargando...</div></div>
+          <div class="metric"><div class="metric-label">Créditos usados este mes</div><div class="metric-val" id="m-credits">—</div><div class="metric-sub" id="m-credits-sub">cargando...</div></div>
+          <div class="metric"><div class="metric-label">Clientes en alerta</div><div class="metric-val" id="m-at-risk" style="color:var(--red-mid)">—</div><div class="metric-sub" id="m-at-risk-sub">cargando...</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card"><div class="card-title">Consumo por cliente (mes actual)</div><div id="dashboard-usage"><div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Cargando...</div></div></div>
+          <div class="card"><div class="card-title">Alertas activas <span class="badge badge-warn" id="alerts-badge">—</span></div><div id="dashboard-alerts"><div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Cargando...</div></div></div>
+        </div>
+        <div class="two-col">
+          <div class="card"><div class="card-title">Actividad reciente</div><div id="dashboard-activity"><div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Cargando...</div></div></div>
+          <div class="card">
+            <div class="card-title">Resumen del sistema</div>
+            <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0">
+              <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--border-light)"><span style="color:var(--text-secondary)">Tenants totales</span><span id="s-total" style="font-weight:500">—</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--border-light)"><span style="color:var(--text-secondary)">Tenants suspendidos</span><span id="s-suspended" style="font-weight:500">—</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--border-light)"><span style="color:var(--text-secondary)">Usuarios totales</span><span id="s-users" style="font-weight:500">—</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0"><span style="color:var(--text-secondary)">Modelos activos</span><span id="s-models" style="font-weight:500">—</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLIENTES -->
+      <section id="page-clientes" class="page with-drawer">
+        <div class="page-header">
+          <div><div class="page-title">Gestión de clientes</div><div class="page-sub" id="clientes-sub">Cargando...</div></div>
+          <div class="hdr-actions">
+            <button class="btn" onclick="exportClientes()">Exportar CSV</button>
+            <button class="btn btn-primary" onclick="openNewTenantModal()">+ Nuevo cliente</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="search-wrap"><input id="clientes-search" class="search-bar" placeholder="Buscar cliente o dominio..."></div>
+          <select id="clientes-filter-plan" class="form-select" style="width:160px"><option value="">Todos los planes</option></select>
+          <select id="clientes-filter-status" class="form-select" style="width:160px">
+            <option value="">Todos los estados</option>
+            <option value="ACTIVE">Activo</option>
+            <option value="SUSPENDED">Suspendido</option>
+          </select>
+          <button class="btn" onclick="loadClients(1)">Filtrar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cliente</th><th>Plan</th><th>Modelos PBI</th><th>Créditos</th><th>Uso %</th><th>Estado</th><th>Alta</th><th></th></tr></thead>
+            <tbody id="clients-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text-tertiary);padding:24px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span id="clientes-count">—</span>
+          <div class="pag-btns" id="clientes-pag"></div>
+        </div>
+        <!-- DRAWER -->
+        <div class="drawer" id="client-drawer">
+          <div class="drawer-hdr"><div class="drawer-title" id="drawer-name">Cliente</div><button class="close-btn" onclick="closeDrawer()">✕</button></div>
+          <div class="stat-trio">
+            <div class="stat-mini"><div class="stat-v" id="dd-credits">—</div><div class="stat-l">Créditos usados</div></div>
+            <div class="stat-mini"><div class="stat-v" id="dd-models">—</div><div class="stat-l">Modelos PBI</div></div>
+            <div class="stat-mini"><div class="stat-v" id="dd-users">—</div><div class="stat-l">Usuarios</div></div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px"><div class="form-label">Razón social</div><input class="form-input" id="dd-razon"></div>
+          <div class="form-group" style="margin-bottom:12px"><div class="form-label">Subdominio</div><input class="form-input" id="dd-sub" style="background:var(--bg-secondary)" readonly></div>
+          <div class="form-row form-row-2" style="margin-bottom:12px">
+            <div class="form-group"><div class="form-label">Plan</div><select id="dd-plan" class="form-select"><option value="">Cargando...</option></select></div>
+            <div class="form-group"><div class="form-label">Límite créditos</div><input class="form-input" id="dd-limit" type="number"></div>
+          </div>
+          <div class="form-row form-row-2" style="margin-bottom:12px">
+            <div class="form-group"><div class="form-label">Estado</div>
+              <select id="dd-status" class="form-select">
+                <option value="ACTIVE">Activo</option>
+                <option value="PAUSED">Pausado</option>
+                <option value="SUSPENDED">Suspendido</option>
+              </select>
+            </div>
+            <div class="form-group"><div class="form-label">Gracia al 100% (h)</div><input class="form-input" id="dd-grace" type="number" value="0"></div>
+          </div>
+          <hr class="section-line">
+          <div style="font-size:12px;font-weight:500;margin-bottom:8px">Umbrales de alerta</div>
+          <div class="toggle-group">
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Alerta al 70%</div></div><div class="toggle off" id="dd-alert70"></div></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Alerta al 80%</div></div><div class="toggle off" id="dd-alert80"></div></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Alerta al 90%</div></div><div class="toggle off" id="dd-alert90"></div></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Suspender al 100%</div></div><div class="toggle off" id="dd-suspend100"></div></div>
+          </div>
+          <hr class="section-line">
+          <div style="font-size:12px;font-weight:500;margin-bottom:10px">Modelos Power BI conectados</div>
+          <div id="dd-connectors"></div>
+          <div class="drawer-footer">
+            <button class="btn-full btn-cancel" onclick="closeDrawer()">Cancelar</button>
+            <button class="btn-full btn-save" onclick="saveDrawer()">Guardar cambios</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOKENS -->
+      <section id="page-tokens" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Token meter · Facturación IA</div><div class="page-sub" id="tokens-sub">Cargando...</div></div>
+          <div class="hdr-actions"><button class="btn" onclick="exportTokens()">↓ Exportar CSV</button></div>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric"><div class="metric-label">Créditos usados (mes)</div><div class="metric-val" id="tk-credits">—</div><div class="metric-sub" id="tk-credits-sub">cargando...</div></div>
+          <div class="metric"><div class="metric-label">Modelos activos</div><div class="metric-val" id="tk-messages">—</div><div class="metric-sub">modelos PBI conectados</div></div>
+          <div class="metric"><div class="metric-label">Clientes activos</div><div class="metric-val" id="tk-tenants">—</div><div class="metric-sub" id="tk-tenants-sub">cargando...</div></div>
+          <div class="metric"><div class="metric-label">Clientes en alerta</div><div class="metric-val" id="tk-alerts" style="color:var(--red-mid)">—</div><div class="metric-sub">uso mayor al 70%</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card"><div class="card-title">Consumo por cliente · mes actual</div><div id="tokens-usage"><div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Cargando...</div></div></div>
+          <div class="card"><div class="card-title">Alertas de consumo</div><div id="tokens-alerts"><div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Cargando...</div></div></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cliente</th><th>Créditos usados</th><th>Límite</th><th>Uso %</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tokens-table-body"><tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PROMPTS -->
+      <section id="page-prompts" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Gestión de prompts globales</div><div class="page-sub" id="prompts-sub">Cargando...</div></div>
+          <div class="hdr-actions"><button class="btn btn-primary" onclick="newPrompt()">+ Nuevo prompt</button></div>
+        </div>
+        <div class="prompts-layout">
+          <div class="prompts-list">
+            <div class="pl-header">
+              <div class="pl-title">Biblioteca</div>
+              <div class="search-wrap"><input id="prompts-search" class="search-bar" placeholder="Buscar..." style="width:100%" oninput="loadPrompts()"></div>
+              <div class="cats">
+                <div class="cat active" onclick="filterCat(this,'')">Todos</div>
+                <div class="cat" style="border-color:var(--green-mid);color:var(--green-deep)" onclick="filterCat(this,'ventas')">Ventas</div>
+                <div class="cat" style="border-color:var(--blue-mid);color:var(--blue-dark)" onclick="filterCat(this,'finanzas')">Finanzas</div>
+                <div class="cat" style="border-color:#D4537E;color:#72243E" onclick="filterCat(this,'rrhh')">RR.HH.</div>
+                <div class="cat" style="border-color:var(--amber-mid);color:var(--amber-dark)" onclick="filterCat(this,'ops')">Ops</div>
+              </div>
+            </div>
+            <div class="pl-scroll">
+              <div class="new-prompt-btn" onclick="newPrompt()">+ Crear nuevo prompt</div>
+              <div id="prompts-list-container"><div style="padding:20px;text-align:center;color:var(--text-tertiary);font-size:12px">Cargando...</div></div>
+            </div>
+          </div>
+          <div class="prompt-editor">
+            <div id="pe-empty" style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:12px">Seleccioná un prompt o creá uno nuevo</div>
+            <div id="pe-form" style="display:none">
+              <div class="pe-header">
+                <div class="pe-title" id="pe-title">—</div>
+                <div class="pe-acts">
+                  <button class="btn btn-danger" id="pe-delete-btn" onclick="deletePrompt()">Eliminar</button>
+                  <button class="btn btn-primary" onclick="savePrompt()">Guardar</button>
+                </div>
+              </div>
+              <div class="pe-stats">
+                <div class="pe-stat"><div class="pe-stat-v" id="pe-stat-global">—</div><div class="pe-stat-l">Visibilidad</div></div>
+                <div class="pe-stat"><div class="pe-stat-v" id="pe-stat-active">—</div><div class="pe-stat-l">Estado</div></div>
+                <div class="pe-stat"><div class="pe-stat-v" id="pe-stat-cat">—</div><div class="pe-stat-l">Categoría</div></div>
+              </div>
+              <div class="form-group" style="margin-bottom:12px"><div class="form-label">Título del prompt</div><input class="form-input" id="pe-title-input"></div>
+              <div class="form-row form-row-2" style="margin-bottom:12px">
+                <div class="form-group"><div class="form-label">Categoría</div>
+                  <select class="form-select" id="pe-category">
+                    <option value="">Sin categoría</option>
+                    <option value="ventas">Ventas</option>
+                    <option value="finanzas">Finanzas</option>
+                    <option value="rrhh">RR.HH.</option>
+                    <option value="ops">Operaciones</option>
+                  </select>
+                </div>
+                <div class="form-group"><div class="form-label">Visibilidad</div>
+                  <select class="form-select" id="pe-global">
+                    <option value="true">Global (todos los clientes)</option>
+                    <option value="false">Solo admin</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:12px"><div class="form-label">Texto del prompt</div><textarea class="form-textarea" rows="8" id="pe-textarea" placeholder="Escribe el prompt aquí..."></textarea></div>
+              <div style="border-top:0.5px solid var(--border-light);padding-top:14px;margin-top:4px">
+                <div class="toggle-group">
+                  <div class="toggle-row"><div class="toggle-info"><div class="tl">Activo y visible para usuarios</div></div><div class="toggle off" id="pe-toggle-active"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONFIG -->
+      <section id="page-config" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Configuración del sistema</div><div class="page-sub">Ajustes globales de la plataforma QUKia</div></div>
+        </div>
+        <div class="config-layout">
+          <div class="config-nav">
+            <div class="cn-section">Sistema</div>
+            <div class="cn-item active" onclick="showConfigSection('auth',this)">Administradores</div>
+            <div class="cn-item" onclick="showConfigSection('plans',this)">Planes</div>
+            <div class="cn-section">Prompts</div>
+            <div class="cn-item" onclick="showConfigSection('system-prompt',this)">Prompt de sistema</div>
+          </div>
+          <div class="config-content">
+            <div class="config-section" id="cs-auth">
+              <div style="font-size:14px;font-weight:600;margin-bottom:3px">Administradores de Cookdata</div>
+              <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px">Usuarios con acceso al panel de administración.</div>
+              <div class="table-wrap" style="margin-bottom:14px">
+                <table>
+                  <thead><tr><th>Email</th><th>Nombre</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+                  <tbody id="admin-users-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);padding:16px">Cargando...</td></tr></tbody>
+                </table>
+              </div>
+              <button class="btn btn-primary" onclick="openNewAdminModal()">+ Añadir administrador</button>
+            </div>
+            <div class="config-section" id="cs-plans" style="display:none">
+              <div style="font-size:14px;font-weight:600;margin-bottom:3px">Planes disponibles</div>
+              <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px">Planes que pueden asignarse a los clientes.</div>
+              <div class="table-wrap" style="margin-bottom:14px">
+                <table>
+                  <thead><tr><th>Nombre</th><th>Slug</th><th>Créditos</th><th>Modelos</th><th>Usuarios</th><th>Precio/mes</th><th>Clientes</th><th>Estado</th><th></th></tr></thead>
+                  <tbody id="plans-tbody"><tr><td colspan="9" style="text-align:center;color:var(--text-tertiary);padding:16px">Cargando...</td></tr></tbody>
+                </table>
+              </div>
+              <button class="btn btn-primary" onclick="openNewPlanModal()">+ Nuevo plan</button>
+            </div>
+            <div class="config-section" id="cs-system-prompt" style="display:none">
+              <div style="font-size:14px;font-weight:600;margin-bottom:3px">Prompt de sistema global</div>
+              <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px">Se inyecta en todas las conversaciones. Gestionalo como prompt global desde la sección Prompts.</div>
+              <div class="card">
+                <div class="card-title">Prompts globales activos</div>
+                <div id="system-prompts-list"><div style="font-size:12px;color:var(--text-tertiary);text-align:center;padding:16px">Cargando...</div></div>
+                <button class="btn btn-primary" style="margin-top:12px" onclick="navigate('prompts')">Gestionar prompts →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOGS -->
+      <section id="page-logs" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Logs de auditoría</div><div class="page-sub">Registro completo de eventos del sistema</div></div>
+          <div class="hdr-actions"><button class="btn" onclick="exportLogs()">↓ Exportar CSV</button></div>
+        </div>
+        <div class="filter-row">
+          <div class="search-wrap"><input id="logs-search" class="search-bar" placeholder="Buscar acción..."></div>
+          <select id="logs-tenant" class="form-select" style="width:200px"><option value="">Todos los tenants</option></select>
+          <select id="logs-user" class="form-select" style="width:160px"><option value="">Todos los usuarios</option></select>
+          <button class="btn" onclick="loadLogs(1)">Filtrar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Timestamp</th><th>Acción</th><th>Entidad</th><th>Entity ID</th><th>Tenant</th><th>Usuario</th></tr></thead>
+            <tbody id="logs-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span id="logs-count">—</span>
+          <div class="pag-btns" id="logs-pag"></div>
+        </div>
+      </section>
+
+      <!-- CONECTORES -->
+      <section id="page-conectores" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Conectores Power BI</div><div class="page-sub" id="conectores-sub">Cargando...</div></div>
+          <div class="hdr-actions"><button class="btn btn-primary" onclick="openNewModelModal()">+ Nuevo conector</button></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nombre del modelo</th><th>Cliente</th><th>Dataset ID</th><th>Conversaciones</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="conectores-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ALERTAS -->
+      <section id="page-alertas" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Alertas de límite de créditos</div><div class="page-sub" id="alertas-sub">Cargando...</div></div>
+        </div>
+        <div class="two-col">
+          <div id="alertas-list"><div style="font-size:12px;color:var(--text-tertiary);padding:24px 0;text-align:center">Cargando...</div></div>
+          <div class="card">
+            <div class="card-title">Umbrales por defecto para nuevos clientes</div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">Los umbrales de clientes existentes se gestionan desde el drawer de cada cliente.</div>
+            <div class="toggle-group">
+              <div class="toggle-row"><div class="toggle-info"><div class="tl">Alerta al 70%</div></div><div class="toggle off" id="def-alert70"></div></div>
+              <div class="toggle-row"><div class="toggle-info"><div class="tl">Alerta al 80%</div></div><div class="toggle" id="def-alert80"></div></div>
+              <div class="toggle-row"><div class="toggle-info"><div class="tl">Alerta al 90%</div></div><div class="toggle" id="def-alert90"></div></div>
+              <div class="toggle-row"><div class="toggle-info"><div class="tl">Suspender al 100%</div></div><div class="toggle" id="def-suspend100"></div></div>
+            </div>
+            <div style="margin-top:14px">
+              <div class="form-label" style="margin-bottom:6px">Período de gracia (horas)</div>
+              <input class="form-input" id="def-grace" value="0" style="width:100px" type="number">
+              <div class="form-hint">0 = suspensión inmediata</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-top:12px">Estos valores son los defaults al crear nuevos clientes.</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL NUEVO TENANT -->
+<div id="modal-new-tenant" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-primary);border-radius:12px;padding:28px;width:440px;box-shadow:0 8px 32px rgba(0,0,0,0.14);">
+    <div style="font-size:15px;font-weight:600;margin-bottom:16px">Nuevo cliente</div>
+    <div style="display:grid;gap:12px;">
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Nombre de la empresa</div><input id="nt-name" class="form-input" placeholder="Ej: Distribuciones Alcalá"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Slug (subdominio)</div><input id="nt-slug" class="form-input" placeholder="Ej: alcala"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Razón social</div><input id="nt-razon" class="form-input" placeholder="Ej: Distribuciones Alcalá SL"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Plan</div><select id="nt-plan" class="form-input"><option value="">Cargando...</option></select></div>
+    </div>
+    <div id="nt-error" style="font-size:11px;color:#D85A30;margin-top:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn" onclick="closeModal('modal-new-tenant')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createTenant()">Crear cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO MODELO -->
+<div id="modal-new-model" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-primary);border-radius:12px;padding:28px;width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.14);">
+    <div style="font-size:15px;font-weight:600;margin-bottom:16px">Nuevo conector Power BI</div>
+    <div style="display:grid;gap:12px;">
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Nombre del modelo</div><input id="nm-name" class="form-input" placeholder="Ej: Ventas 2025"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Cliente</div><select id="nm-tenant" class="form-input"><option value="">Seleccionar...</option></select></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Workspace ID</div><input id="nm-workspace" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Dataset ID</div><input id="nm-dataset" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Client ID (Azure)</div><input id="nm-clientid" class="form-input" placeholder="Opcional"></div>
+        <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Tenant ID (Azure)</div><input id="nm-tenantid" class="form-input" placeholder="Opcional"></div>
+      </div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Client Secret</div><input id="nm-secret" type="password" class="form-input" placeholder="Opcional"></div>
+    </div>
+    <div id="nm-error" style="font-size:11px;color:#D85A30;margin-top:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn" onclick="closeModal('modal-new-model')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createModel()">Crear conector</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO ADMIN -->
+<div id="modal-new-admin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-primary);border-radius:12px;padding:28px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.14);">
+    <div style="font-size:15px;font-weight:600;margin-bottom:16px">Nuevo administrador</div>
+    <div style="display:grid;gap:12px;">
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Email</div><input id="na-email" class="form-input" type="email" placeholder="admin@cookdata.io"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Nombre</div><input id="na-name" class="form-input" placeholder="Nombre completo"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Contraseña temporal</div><input id="na-password" class="form-input" type="password" placeholder="Mínimo 8 caracteres"></div>
+    </div>
+    <div id="na-error" style="font-size:11px;color:#D85A30;margin-top:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn" onclick="closeModal('modal-new-admin')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createAdmin()">Crear administrador</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO PLAN -->
+<div id="modal-new-plan" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-primary);border-radius:12px;padding:28px;width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.14);">
+    <div style="font-size:15px;font-weight:600;margin-bottom:16px">Nuevo plan</div>
+    <div style="display:grid;gap:12px;">
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Nombre</div><input id="np-name" class="form-input" placeholder="Ej: Enterprise"></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Slug</div><input id="np-slug" class="form-input" placeholder="Ej: enterprise"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Límite créditos</div><input id="np-credits" class="form-input" type="number" placeholder="10000"></div>
+        <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Precio/mes (€)</div><input id="np-price" class="form-input" type="number" placeholder="299"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Máx. modelos</div><input id="np-models" class="form-input" type="number" placeholder="999"></div>
+        <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Máx. usuarios</div><input id="np-users" class="form-input" type="number" placeholder="999"></div>
+      </div>
+    </div>
+    <div id="np-error" style="font-size:11px;color:#D85A30;margin-top:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn" onclick="closeModal('modal-new-plan')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createPlan()">Crear plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-primary);border-radius:12px;padding:32px 36px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.14);">
+    <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px">QU<span style="color:var(--green-dark)">Ki</span>a</div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:24px">Admin Console · Cookdata</div>
+    <div style="margin-bottom:12px"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:5px">Email</div><input id="login-email" type="email" value="admin@cookdata.io" style="width:100%;padding:8px 10px;border:0.5px solid var(--border-mid);border-radius:8px;font-size:12px;font-family:inherit;outline:none;background:var(--bg-primary);color:var(--text-primary)"></div>
+    <div style="margin-bottom:20px"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:5px">Contraseña</div><input id="login-password" type="password" value="changeme123" style="width:100%;padding:8px 10px;border:0.5px solid var(--border-mid);border-radius:8px;font-size:12px;font-family:inherit;outline:none;background:var(--bg-primary);color:var(--text-primary)"></div>
+    <div id="login-error" style="font-size:11px;color:#D85A30;margin-bottom:10px;display:none"></div>
+    <button onclick="doLogin()" style="width:100%;padding:9px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">Entrar</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = 'http://localhost:3000';
+let token = localStorage.getItem('qukia_admin_token') || '';
+let _sessionActive = false;
+let _dashCache = null, _dashCacheTs = 0;
+const DASH_TTL = 30000;
+let clientsPage = 1;
+let promptsCategory = '';
+let activePromptId  = null;
+let promptsCache    = [];
+let plansCache = [];
+let _dashData  = null;
+
+// ─── DARK MODE ────────────────────────────────────────────────────────────────
+function applyDark(on) {
+  document.documentElement.classList.toggle('dark', on);
+  document.querySelectorAll('.dark-toggle-track').forEach(t => t.classList.toggle('on', on));
+}
+function toggleDark() {
+  const isDark = document.documentElement.classList.contains('dark');
+  applyDark(!isDark);
+  localStorage.setItem('qukia_admin_dark', !isDark ? '1' : '0');
+}
+// Aplicar al cargar
+applyDark(localStorage.getItem('qukia_admin_dark') === '1');
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const setT = (id, v) => { const e=$(id); if(e) e.textContent=v; };
+const setV = (id, v) => { const e=$(id); if(e) e.value=v; };
+const isOn = id => { const e=$(id); return e?!e.classList.contains('off'):false; };
+const setOn = (id, on) => { const e=$(id); if(e){ if(on) e.classList.remove('off'); else e.classList.add('off'); } };
+
+function timeAgo(d) {
+  const s = Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60) return 'ahora';
+  if(s<3600) return `${Math.floor(s/60)}m`;
+  if(s<86400) return `${Math.floor(s/3600)}h`;
+  return `${Math.floor(s/86400)}d`;
+}
+
+function showToast(msg, type='ok') {
+  const t=document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:24px;right:24px;background:${type==='error'?'#D85A30':'var(--green-dark)'};color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:500;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:opacity .3s;pointer-events:none`;
+  t.textContent=msg; document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);
+}
+
+// ─── CSV EXPORT ───────────────────────────────────────────────────────────────
+function toCSV(rows, headers) {
+  const sep = ';';
+  const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  return ['sep='+sep, headers.map(esc).join(sep), ...rows.map(r=>headers.map(h=>esc(r[h])).join(sep))].join('\n');
+}
+function downloadCSV(content, filename) {
+  const blob = new Blob(['\uFEFF'+content], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function exportDashboard() {
+  const data = await getDashboard();
+  if(!data) return;
+  const rows = data.topTenantsByUsage.map(t=>({Nombre:t.name,Slug:t.slug,Creditos_Usados:t.creditUsed,Credito_Limite:t.creditLimit,Porcentaje:t.pct+'%',Estado:t.status,Plan:t.plan}));
+  downloadCSV(toCSV(rows,['Nombre','Slug','Creditos_Usados','Credito_Limite','Porcentaje','Estado','Plan']),`dashboard_${new Date().toISOString().slice(0,10)}.csv`);
+}
+async function exportClientes() {
+  const data = await apiFetch('/admin/tenants?limit=1000&page=1' + buildClientParams());
+  if(!data) return;
+  const rows = data.data.map(t=>({Nombre:t.name,Slug:t.slug,Subdominio:t.subdomain,Razon_Social:t.razonSocial||'',Plan:t.plan?.name||'',Creditos_Usados:t.creditUsed,Limite:t.creditLimit,Porcentaje:t.pct+'%',Estado:t.status,Alta:new Date(t.createdAt).toLocaleDateString('es-ES')}));
+  downloadCSV(toCSV(rows,['Nombre','Slug','Subdominio','Razon_Social','Plan','Creditos_Usados','Limite','Porcentaje','Estado','Alta']),`clientes_${new Date().toISOString().slice(0,10)}.csv`);
+}
+async function exportTokens() {
+  const data = await getDashboard(true);
+  if(!data) return;
+  const rows = data.topTenantsByUsage.map(t=>({Cliente:t.name,Creditos_Usados:t.creditUsed,Limite:t.creditLimit||0,Porcentaje:t.pct+'%',Plan:t.plan,Estado:t.status}));
+  downloadCSV(toCSV(rows,['Cliente','Creditos_Usados','Limite','Porcentaje','Plan','Estado']),`tokens_${new Date().toISOString().slice(0,10)}.csv`);
+}
+async function exportLogs() {
+  const action=$('logs-search')?.value||'', tenantId=$('logs-tenant')?.value||'', userId=$('logs-user')?.value||'';
+  const params=new URLSearchParams({page:1,limit:5000});
+  if(action) params.set('action',action);
+  if(tenantId) params.set('tenantId',tenantId);
+  if(userId) params.set('userId',userId);
+  const data = await apiFetch(`/admin/logs?${params}`);
+  if(!data) return;
+  const rows = data.data.map(l=>({Timestamp:new Date(l.createdAt).toLocaleString('es-ES'),Accion:l.action,Entidad:l.entity||'',EntityId:l.entityId||'',TenantId:l.tenantId||'',UserId:l.userId||''}));
+  downloadCSV(toCSV(rows,['Timestamp','Accion','Entidad','EntityId','TenantId','UserId']),`logs_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const email=($('login-email').value||'').trim(), pass=$('login-password').value;
+  const errEl=$('login-error'); errEl.style.display='none';
+  try {
+    const res=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const data=await res.json();
+    if(!res.ok){errEl.textContent=data.error||'Error al iniciar sesión';errEl.style.display='block';return;}
+    if(data.user?.role?.toUpperCase()!=='SUPERADMIN'){errEl.textContent='Acceso solo para administradores';errEl.style.display='block';return;}
+    token=data.accessToken;
+    localStorage.setItem('qukia_admin_token',token);
+    localStorage.setItem('qukia_admin_refresh',data.refreshToken);
+    _sessionActive=true;
+    setUserUI(data.user);
+    $('login-overlay').style.display='none';
+    initApp();
+  } catch(e){errEl.textContent='Error de conexión con el servidor';errEl.style.display='block';}
+}
+
+function setUserUI(u) {
+  const n=u.name||u.email;
+  setT('topbar-email',u.email); setT('topbar-avatar',n.slice(0,2).toUpperCase()); setT('menu-email',u.email);
+}
+
+function logout() {
+  const rt=localStorage.getItem('qukia_admin_refresh');
+  if(rt) fetch(`${API}/auth/logout`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:rt})}).catch(()=>{});
+  localStorage.removeItem('qukia_admin_token');
+  localStorage.removeItem('qukia_admin_refresh');
+  token='';_sessionActive=false;
+  $('login-overlay').style.display='flex';
+}
+
+async function apiFetch(path, opts={}) {
+  try {
+    const res=await fetch(API+path,{...opts,headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json',...(opts.headers||{})}});
+    if(res.status===401){if(_sessionActive){_sessionActive=false;logout();}return null;}
+    return res.json();
+  } catch(e){showToast('Error de conexión','error');return null;}
+}
+
+// ─── DASHBOARD CACHE ─────────────────────────────────────────────────────────
+async function getDashboard(force) {
+  if(!force && _dashCache && Date.now()-_dashCacheTs<DASH_TTL) return _dashCache;
+  const data=await apiFetch('/admin/dashboard');
+  if(data){_dashCache=data;_dashCacheTs=Date.now();_dashData=data;}
+  return data;
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+const pageHandlers={
+  dashboard:()=>loadDashboard(),
+  clientes: ()=>loadClients(1),
+  tokens:   ()=>loadTokens(),
+  alertas:  ()=>loadAlertas(),
+  prompts:  ()=>loadPrompts(),
+  conectores:()=>loadConectores(),
+  logs:     ()=>loadLogs(1),
+  config:   ()=>{showConfigSection('auth',document.querySelector('.cn-item'));loadAdminUsers();},
+};
+
+function navigate(pageId, topEl, sbEl) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const t=$('page-'+pageId); if(t) t.classList.add('active');
+  document.querySelectorAll('.top-nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  if(topEl) topEl.classList.add('active');
+  if(sbEl)  sbEl.classList.add('active');
+  closeDrawer();
+  if(pageHandlers[pageId]) pageHandlers[pageId]();
+}
+
+// ─── MODALS ───────────────────────────────────────────────────────────────────
+function openModal(id){const m=$(id);if(m)m.style.display='flex';}
+function closeModal(id){const m=$(id);if(m)m.style.display='none';}
+
+// ─── USER MENU ────────────────────────────────────────────────────────────────
+function toggleUserMenu(){const m=$('user-menu');if(m)m.style.display=m.style.display==='none'?'block':'none';}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.admin-pill')){const m=$('user-menu');if(m)m.style.display='none';}
+  const t=e.target.closest('.toggle');
+  if(t&&!t.id.startsWith('dark')) t.classList.toggle('off');
+});
+
+// ─── PLANS CACHE ─────────────────────────────────────────────────────────────
+async function getPlans() {
+  if(plansCache.length) return plansCache;
+  const data=await apiFetch('/admin/plans');
+  if(data) plansCache=data;
+  return plansCache;
+}
+function fillPlanSelect(selId, selectedId) {
+  const sel=$(selId); if(!sel) return;
+  sel.innerHTML=plansCache.map(p=>`<option value="${p.id}"${p.id===selectedId?' selected':''}>${p.name} · ${p.creditLimit.toLocaleString('es-ES')} créditos</option>`).join('');
+}
+
+// ─── SHARED RENDER HELPERS ───────────────────────────────────────────────────
+function usageRow(t) {
+  const c=t.pct>=90?'pbar-red':t.pct>=70?'pbar-amber':'pbar-green';
+  const p=t.pct>=90?'pct-hi':t.pct>=70?'pct-mid':'pct-ok';
+  return `<div class="usage-row"><div class="usage-name">${t.name}</div><div class="usage-track"><div class="usage-fill ${c}" style="width:${Math.min(t.pct,100)}%"></div></div><div class="usage-val">${t.creditUsed.toLocaleString('es-ES')}</div><span class="pct-pill ${p}">${t.pct}%</span></div>`;
+}
+function alertRow(t) {
+  const type=t.pct>=100?'alert-red':t.pct>=80?'alert-amber':'alert-blue';
+  const icon=t.pct>=100?'⛔':'⚠';
+  const msg=t.pct>=100?'ha alcanzado el 100% de créditos.':`está al ${t.pct}% de sus créditos.`;
+  return `<div class="alert-item ${type}"><div class="alert-icon">${icon}</div><div class="alert-body"><div><strong>${t.name}</strong> ${msg}</div></div><button class="btn alert-act" style="font-size:11px;padding:4px 10px" onclick="navigate('clientes')">Ver</button></div>`;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+async function loadDashboard(force) {
+  const data=await getDashboard(force); if(!data) return;
+  const m=data.metrics;
+  const now=new Date();
+  const ds=now.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  setT('dashboard-date',ds.charAt(0).toUpperCase()+ds.slice(1)+' · Resumen en tiempo real');
+  setT('m-active-tenants',m.activeTenants);
+  setT('m-active-tenants-sub',`${m.totalTenants} totales · ${m.suspendedTenants} suspendidos`);
+  setT('m-total-models',m.totalModels);
+  setT('m-total-users-sub',`${m.totalUsers} usuarios registrados`);
+  setT('m-credits',m.creditsUsedThisMonth.toLocaleString('es-ES'));
+  setT('m-credits-sub','créditos consumidos en el mes');
+  setT('m-at-risk',m.tenantsAtRisk);
+  setT('m-at-risk-sub',m.tenantsAtRisk>0?'con uso mayor al 70%':'ningún cliente en alerta');
+  $('m-at-risk').style.color=m.tenantsAtRisk>0?'var(--red-mid)':'var(--text-primary)';
+  setT('s-total',m.totalTenants);setT('s-suspended',m.suspendedTenants);
+  setT('s-users',m.totalUsers);setT('s-models',m.totalModels);
+  const n=data.tenantsAtRisk.length;
+  setT('alertas-badge-top',`${n} alerta${n!==1?'s':''}`);
+  setT('alertas-badge',n);
+  setT('alerts-badge',`${n} pendiente${n!==1?'s':''}`);
+  $('dashboard-usage').innerHTML=data.topTenantsByUsage.length?data.topTenantsByUsage.slice(0,6).map(usageRow).join(''):'<div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Sin datos de consumo aún</div>';
+  $('dashboard-alerts').innerHTML=data.tenantsAtRisk.length?data.tenantsAtRisk.map(alertRow).join(''):'<div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Sin alertas activas</div>';
+  const actColors={TENANT_CREATED:'var(--green-mid)',PROMPT_CREATED:'var(--blue-mid)',PROMPT_UPDATED:'var(--blue-mid)'};
+  $('dashboard-activity').innerHTML=data.recentActivity?.length?data.recentActivity.slice(0,6).map(l=>`<div class="feed-row"><div class="feed-dot" style="background:${actColors[l.action]||'var(--text-tertiary)'}"></div><div class="feed-text">${l.action}${l.entity?' · '+l.entity:''}</div><div class="feed-time">${timeAgo(l.createdAt)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Sin actividad registrada</div>';
+}
+
+// ─── CLIENTS ─────────────────────────────────────────────────────────────────
+function buildClientParams() {
+  const s=$('clientes-search')?.value||'', plan=$('clientes-filter-plan')?.value||'', status=$('clientes-filter-status')?.value||'';
+  let q='';
+  if(s) q+=`&search=${encodeURIComponent(s)}`;
+  if(plan) q+=`&plan=${encodeURIComponent(plan)}`;
+  if(status) q+=`&status=${encodeURIComponent(status)}`;
+  return q;
+}
+
+async function loadClients(page) {
+  clientsPage=page||clientsPage;
+  const tbody=$('clients-tbody');
+  if(tbody) tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-tertiary);padding:24px">Cargando...</td></tr>';
+  await getPlans();
+  const pf=$('clientes-filter-plan');
+  if(pf&&pf.options.length<=1) plansCache.forEach(p=>{const o=document.createElement('option');o.value=p.slug;o.textContent=p.name;pf.appendChild(o);});
+  const data=await apiFetch(`/admin/tenants?page=${clientsPage}&limit=20${buildClientParams()}`);
+  if(!data) return;
+  setT('clientes-sub',`${data.pagination.total} clientes registrados · ${data.data.filter(t=>t.status==='ACTIVE').length} activos`);
+  setT('clientes-count',`Mostrando ${data.data.length} de ${data.pagination.total} clientes`);
+  const pagEl=$('clientes-pag');
+  if(pagEl){
+    const tot=data.pagination.pages;
+    let h=`<button class="pag-btn" onclick="loadClients(${Math.max(1,clientsPage-1)})">← Ant</button>`;
+    for(let i=1;i<=Math.min(tot,5);i++) h+=`<button class="pag-btn${i===clientsPage?' active':''}" onclick="loadClients(${i})">${i}</button>`;
+    if(tot>5) h+=`<button class="pag-btn" onclick="loadClients(${tot})">…${tot}</button>`;
+    h+=`<button class="pag-btn" onclick="loadClients(${Math.min(tot,clientsPage+1)})">Sig →</button>`;
+    pagEl.innerHTML=h;
+  }
+  if(!tbody) return;
+  if(!data.data.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-tertiary);padding:24px">Sin clientes</td></tr>';return;}
+  tbody.innerHTML=data.data.map(t=>{
+    const c=t.pct>=90?'pbar-red':t.pct>=70?'pbar-amber':'pbar-green';
+    const pc=t.plan?.slug==='enterprise'?'plan-ent':t.plan?.slug==='pro'?'plan-pro':'plan-basic';
+    const st=t.status==='SUSPENDED'?'<span class="badge badge-limit">Suspendido</span>':t.pct>=100?'<span class="badge badge-limit">⛔ Límite</span>':t.pct>=70?`<span class="badge badge-warn">⚠ ${t.pct}%</span>`:'<span class="badge badge-active">● Activo</span>';
+    const date=new Date(t.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'});
+    const ab=t.pct>=70||t.status==='SUSPENDED'?`<button class="act green" onclick="addCredits('${t.id}')">Renovar</button>`:`<button class="act" onclick="openEditModal('${t.id}')">Editar</button>`;
+    return `<tr><td><div style="font-weight:500">${t.name}</div><div style="font-size:10px;color:var(--text-tertiary)">${t.subdomain}</div></td><td><span class="plan-badge ${pc}">${t.plan?.name||'—'}</span></td><td>${t.models??0}</td><td style="font-size:11px">${t.creditUsed.toLocaleString('es-ES')} / ${t.creditLimit.toLocaleString('es-ES')}</td><td><div class="pbar"><div class="pbar-track"><div class="pbar-fill ${c}" style="width:${Math.min(t.pct,100)}%"></div></div><span style="font-size:10px;margin-left:4px">${t.pct}%</span></div></td><td>${st}</td><td style="font-size:11px;color:var(--text-tertiary)">${date}</td><td><div class="row-acts"><button class="act" onclick="openDrawer('${t.id}')">Ver</button>${ab}</div></td></tr>`;
+  }).join('');
+}
+
+// ─── DRAWER ───────────────────────────────────────────────────────────────────
+let currentTenantId=null;
+
+async function openDrawer(id) {
+  currentTenantId=id;
+  await getPlans();
+  const data=await apiFetch(`/admin/tenants/${id}`); if(!data) return;
+  setT('drawer-name',data.name);
+  setT('dd-credits',data.creditUsed.toLocaleString('es-ES'));
+  setT('dd-models',data.models?.length??0);
+  setT('dd-users',data.users?.length??0);
+  setV('dd-razon',data.razonSocial||'');
+  setV('dd-sub',data.subdomain||'');
+  setV('dd-limit',data.creditLimit);
+  setV('dd-status',data.status);
+  setV('dd-grace',data.gracePeriodH??0);
+  fillPlanSelect('dd-plan',data.planId);
+  setOn('dd-alert70',!!data.alertAt70);
+  setOn('dd-alert80',!!data.alertAt80);
+  setOn('dd-alert90',!!data.alertAt90);
+  setOn('dd-suspend100',!!data.suspendAt100);
+  $('dd-connectors').innerHTML=(data.models||[]).map(m=>`<div class="connector-item"><div style="display:flex;align-items:center;gap:7px"><div class="conn-dot ${m.status==='ACTIVE'?'cdot-on':'cdot-off'}"></div><span style="font-size:12px">${m.name}</span></div><span style="font-size:10px;color:${m.status==='ACTIVE'?'var(--text-tertiary)':'var(--red-mid)'}">${(m.pbiDatasetId||'').slice(0,16)}…</span></div>`).join('')||'<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0">Sin modelos conectados</div>';
+  $('client-drawer').classList.add('open');
+}
+
+function closeDrawer(){$('client-drawer')?.classList.remove('open');currentTenantId=null;}
+
+async function saveDrawer() {
+  if(!currentTenantId) return;
+  const body={razonSocial:$('dd-razon').value,creditLimit:parseInt($('dd-limit').value),planId:$('dd-plan').value,status:$('dd-status').value,gracePeriodH:parseInt($('dd-grace').value)||0,alertAt70:isOn('dd-alert70'),alertAt80:isOn('dd-alert80'),alertAt90:isOn('dd-alert90'),suspendAt100:isOn('dd-suspend100')};
+  const res=await apiFetch(`/admin/tenants/${currentTenantId}`,{method:'PATCH',body:JSON.stringify(body)});
+  if(res?.id){closeDrawer();await refreshAll();showToast('Cliente actualizado');}
+  else showToast(res?.error||'Error al guardar','error');
+}
+
+async function openEditModal(id){ await openDrawer(id); }
+
+async function addCredits(tenantId) {
+  const amount=parseInt(prompt('Créditos a agregar:'));
+  if(!amount||isNaN(amount)||amount<=0) return;
+  const res=await apiFetch(`/admin/tenants/${tenantId}/credits`,{method:'POST',body:JSON.stringify({amount,type:'PURCHASE',description:'Ampliación manual'})});
+  if(res?.ok){await refreshAll();showToast(`${amount} créditos agregados`);}
+  else showToast(res?.error||'Error al agregar créditos','error');
+}
+
+async function openNewTenantModal() {
+  await getPlans(); fillPlanSelect('nt-plan',null);
+  ['nt-name','nt-slug','nt-razon'].forEach(id=>setV(id,''));
+  $('nt-error').style.display='none';
+  openModal('modal-new-tenant');
+}
+
+async function createTenant() {
+  const errEl=$('nt-error'), btn=document.querySelector('#modal-new-tenant .btn-primary');
+  errEl.style.display='none';
+  const body={name:$('nt-name').value.trim(),slug:$('nt-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,''),razonSocial:$('nt-razon').value.trim(),planId:$('nt-plan').value};
+  if(!body.name||!body.slug||!body.planId){errEl.textContent='Nombre, slug y plan son obligatorios';errEl.style.display='block';return;}
+  btn.textContent='Creando...';btn.disabled=true;
+  const res=await apiFetch('/admin/tenants',{method:'POST',body:JSON.stringify(body)});
+  btn.textContent='Crear cliente';btn.disabled=false;
+  if(res?.id){closeModal('modal-new-tenant');await refreshAll();showToast(`Cliente "${body.name}" creado`);}
+  else{errEl.textContent=res?.error||'Error al crear';errEl.style.display='block';}
+}
+
+// ─── CONECTORES ──────────────────────────────────────────────────────────────
+async function loadConectores() {
+  const tbody=$('conectores-tbody');
+  if(tbody) tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Cargando...</td></tr>';
+  const data=await apiFetch('/admin/models?limit=50'); if(!data) return;
+  setT('conectores-sub',`${data.pagination.total} modelos registrados · ${data.data.filter(m=>m.status==='ACTIVE').length} activos`);
+  if(!tbody) return;
+  if(!data.data.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Sin modelos configurados</td></tr>';return;}
+  tbody.innerHTML=data.data.map(m=>{
+    const badge=m.status==='ACTIVE'?'<span class="badge badge-active">Activo</span>':'<span class="badge badge-pause">Inactivo</span>';
+    const toggle=m.status==='ACTIVE'?`<button class="act red" onclick="toggleModel('${m.id}','INACTIVE')">Desactivar</button>`:`<button class="act green" onclick="toggleModel('${m.id}','ACTIVE')">Activar</button>`;
+    return `<tr><td style="font-weight:500">${m.name}</td><td style="font-size:11px;color:var(--text-secondary)">${m.tenant?.name||'—'}</td><td style="font-size:11px;font-family:monospace;color:var(--text-tertiary)">${(m.pbiDatasetId||'').slice(0,22)}…</td><td style="font-size:11px">${m._count?.conversations??0}</td><td>${badge}</td><td><div class="row-acts"><button class="act" onclick="openDrawer('${m.tenantId}')">Ver tenant</button><button class="act" onclick="testModel('${m.id}')">Test PBI</button>${toggle}</div></td></tr>`;
+  }).join('');
+}
+
+async function toggleModel(id, status) {
+  await apiFetch(`/admin/models/${id}`,{method:'PATCH',body:JSON.stringify({status})});
+  loadConectores();
+  showToast(status==='ACTIVE'?'Modelo activado':'Modelo desactivado');
+}
+
+async function testModel(id) {
+  showToast('Probando conexión PBI...');
+  const res=await apiFetch(`/admin/models/${id}/test`,{method:'POST'});
+  if(res?.ok) showToast('Conexión Power BI exitosa ✓');
+  else showToast(res?.error||'Error al conectar con Power BI','error');
+}
+
+async function openNewModelModal() {
+  const data=await apiFetch('/admin/tenants?limit=100'); if(!data) return;
+  $('nm-tenant').innerHTML='<option value="">Seleccionar...</option>'+data.data.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  ['nm-name','nm-workspace','nm-dataset','nm-clientid','nm-tenantid','nm-secret'].forEach(id=>setV(id,''));
+  $('nm-error').style.display='none';
+  openModal('modal-new-model');
+}
+
+async function createModel() {
+  const errEl=$('nm-error'), btn=document.querySelector('#modal-new-model .btn-primary');
+  errEl.style.display='none';
+  const body={name:$('nm-name').value.trim(),tenantId:$('nm-tenant').value,pbiWorkspaceId:$('nm-workspace').value.trim(),pbiDatasetId:$('nm-dataset').value.trim(),pbiClientId:$('nm-clientid').value.trim()||undefined,pbiTenantId:$('nm-tenantid').value.trim()||undefined,pbiClientSecret:$('nm-secret').value.trim()||undefined};
+  if(!body.name||!body.tenantId||!body.pbiWorkspaceId||!body.pbiDatasetId){errEl.textContent='Nombre, cliente, workspace y dataset son obligatorios';errEl.style.display='block';return;}
+  btn.textContent='Creando...';btn.disabled=true;
+  const res=await apiFetch('/admin/models',{method:'POST',body:JSON.stringify(body)});
+  btn.textContent='Crear conector';btn.disabled=false;
+  if(res?.id){closeModal('modal-new-model');loadConectores();showToast(`Conector "${body.name}" creado`);}
+  else{errEl.textContent=res?.error||'Error al crear';errEl.style.display='block';}
+}
+
+// ─── TOKENS ───────────────────────────────────────────────────────────────────
+async function loadTokens() {
+  const data=await getDashboard(); if(!data) return;
+  const m=data.metrics, now=new Date();
+  $('tokens-sub').innerHTML=`${now.toLocaleString('es-ES',{month:'long',year:'numeric'})} · Créditos acumulados: <strong>${m.creditsUsedThisMonth.toLocaleString('es-ES')}</strong>`;
+  setT('tk-credits',m.creditsUsedThisMonth.toLocaleString('es-ES'));
+  setT('tk-credits-sub','créditos consumidos');
+  setT('tk-tenants',m.activeTenants);
+  setT('tk-tenants-sub',`${m.totalTenants} registrados`);
+  setT('tk-alerts',m.tenantsAtRisk);
+  setT('tk-messages',m.totalModels);
+  $('tokens-usage').innerHTML=data.topTenantsByUsage.length?data.topTenantsByUsage.map(usageRow).join(''):'<div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Sin consumo</div>';
+  $('tokens-alerts').innerHTML=data.tenantsAtRisk.length?data.tenantsAtRisk.map(alertRow).join(''):'<div style="font-size:12px;color:var(--text-tertiary);padding:16px 0;text-align:center">Sin alertas</div>';
+  const tbody=$('tokens-table-body');
+  if(tbody) tbody.innerHTML=data.topTenantsByUsage.map(t=>{
+    const c=t.pct>=90?'pbar-red':t.pct>=70?'pbar-amber':'pbar-green';
+    const p=t.pct>=90?'pct-hi':t.pct>=70?'pct-mid':'pct-ok';
+    const st=t.status==='SUSPENDED'?'<span class="badge badge-limit">Suspendido</span>':t.pct>=90?'<span class="badge badge-limit">Límite</span>':'<span class="badge badge-active">Activo</span>';
+    return `<tr><td style="font-weight:500">${t.name}</td><td>${t.creditUsed.toLocaleString('es-ES')}</td><td>${(t.creditLimit||0).toLocaleString('es-ES')}</td><td><div class="pbar"><div class="pbar-track"><div class="pbar-fill ${c}" style="width:${Math.min(t.pct,100)}%"></div></div><span style="font-size:10px;margin-left:4px">${t.pct}%</span></div></td><td>${st}</td><td><button class="act green" onclick="addCredits('${t.id}')">Renovar</button></td></tr>`;
+  }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Sin datos</td></tr>';
+}
+
+// ─── ALERTAS ──────────────────────────────────────────────────────────────────
+async function loadAlertas() {
+  const data=await getDashboard(); if(!data) return;
+  setT('alertas-sub',`${data.tenantsAtRisk.length} alertas activas`);
+  $('alertas-list').innerHTML=!data.tenantsAtRisk.length
+    ?'<div style="font-size:13px;color:var(--text-tertiary);padding:32px 0;text-align:center">No hay alertas activas</div>'
+    :data.tenantsAtRisk.map(t=>{
+        const isLimit=t.pct>=100;
+        const type=isLimit?'alert-red':t.pct>=80?'alert-amber':'alert-blue';
+        return `<div class="alert-item ${type}" style="margin-bottom:10px"><div class="alert-icon" style="font-size:18px">${isLimit?'⛔':'⚠'}</div><div class="alert-body"><div style="font-weight:500;font-size:13px">${t.name} · ${isLimit?'Límite alcanzado':t.pct+'% consumido'}</div><div style="font-size:12px;margin-top:2px">${t.pct}% del límite de créditos.</div></div><div style="display:flex;flex-direction:column;gap:5px"><button class="btn btn-green" style="font-size:11px" onclick="addCredits('${t.id}')">Renovar</button><button class="btn" style="font-size:11px" onclick="openDrawer('${t.id}')">Ver cliente</button></div></div>`;
+      }).join('');
+}
+
+// ─── PROMPTS ──────────────────────────────────────────────────────────────────
+async function loadPrompts() {
+  const search=$('prompts-search')?.value||'';
+  const params=new URLSearchParams();
+  if(promptsCategory) params.set('category',promptsCategory);
+  if(search)          params.set('search',search);
+  const data=await apiFetch(`/admin/prompts?${params}`); if(!data) return;
+  const active=data.filter(p=>p.isActive).length;
+  setT('prompts-sub',`${active} prompt${active!==1?'s':''} activo${active!==1?'s':''} · ${data.length} total`);
+  promptsCache = data;
+  const catC=c=>c==='ventas'?'ptag-ventas':c==='finanzas'?'ptag-finanzas':c==='rrhh'?'ptag-rrhh':c==='ops'?'ptag-ops':'ptag-gen';
+  $('prompts-list-container').innerHTML=!data.length
+    ?'<div style="padding:20px;text-align:center;color:var(--text-tertiary);font-size:12px">Sin prompts que coincidan</div>'
+    :data.map((p,i)=>`<div class="prompt-item${activePromptId===p.id?' active':''}" onclick="selectPromptById('${p.id}',this)">
+        <div class="pi-hd"><div class="pi-dot ${p.isActive?'pi-dot-on':'pi-dot-off'}"></div><div class="pi-title${p.isActive?'':' muted'}">${p.title}</div></div>
+        <div class="pi-preview">${p.body.slice(0,80)}…</div>
+        <div class="pi-meta">
+          <span class="ptag ${catC(p.category||'gen')}">${p.category||'general'}</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-tertiary)" onclick="event.stopPropagation();togglePromptActive('${p.id}',${p.isActive})">
+            <span>${p.isActive?'Activo':'Inactivo'}</span>
+            <div style="width:26px;height:15px;border-radius:8px;background:${p.isActive?'var(--green-mid)':'var(--bg-tertiary)'};border:0.5px solid var(--border-mid);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s">
+              <div style="position:absolute;width:11px;height:11px;border-radius:50%;background:#fff;top:1px;${p.isActive?'right:1px':'left:1px'};box-shadow:0 1px 2px rgba(0,0,0,0.2);transition:all .2s"></div>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  if(data.length&&!activePromptId) selectPromptById(data[0].id);
+}
+
+function filterCat(el, cat) {
+  document.querySelectorAll('.cat').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  promptsCategory=cat;
+  loadPrompts();
+}
+
+async function togglePromptActive(id, currentlyActive) {
+  const res = await apiFetch(`/admin/prompts/${id}`,{method:'PATCH',body:JSON.stringify({isActive:!currentlyActive})});
+  if(res?.id||res?.title){
+    // update cache
+    const p = promptsCache.find(x=>x.id===id);
+    if(p) p.isActive = !currentlyActive;
+    // si es el activo en editor, sync el toggle
+    if(activePromptId===id) setOn('pe-toggle-active',!currentlyActive);
+    showToast(!currentlyActive?'Prompt activado':'Prompt desactivado');
+    loadPrompts();
+  } else showToast('Error al actualizar','error');
+}
+
+function selectPromptById(id, el) {
+  const p = promptsCache.find(x => x.id === id);
+  if(!p) return;
+  selectPrompt(p, el);
+}
+
+function selectPrompt(p, el) {
+  activePromptId=p.id;
+  document.querySelectorAll('.prompt-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  $('pe-empty').style.display='none';
+  $('pe-form').style.display='block';
+  $('pe-delete-btn').style.display='inline-flex';
+  setT('pe-title',p.title);
+  setV('pe-title-input',p.title);
+  setV('pe-textarea',p.body);
+  setV('pe-category',p.category||'');
+  setV('pe-global',String(p.isGlobal!==false));
+  setT('pe-stat-global',p.isGlobal!==false?'Global':'Solo admin');
+  setT('pe-stat-active',p.isActive?'Activo':'Inactivo');
+  setT('pe-stat-cat',p.category||'general');
+  setOn('pe-toggle-active',!!p.isActive);
+}
+
+function newPrompt() {
+  activePromptId=null;
+  document.querySelectorAll('.prompt-item').forEach(i=>i.classList.remove('active'));
+  $('pe-empty').style.display='none';
+  $('pe-form').style.display='block';
+  $('pe-delete-btn').style.display='none';
+  setT('pe-title','Nuevo prompt');
+  setV('pe-title-input','');setV('pe-textarea','');
+  setV('pe-category','');setV('pe-global','true');
+  setT('pe-stat-global','—');setT('pe-stat-active','Nuevo');setT('pe-stat-cat','—');
+  setOn('pe-toggle-active',true);
+}
+
+async function savePrompt() {
+  const title=$('pe-title-input').value.trim();
+  const body=$('pe-textarea').value.trim();
+  if(!title||!body){showToast('Título y cuerpo son obligatorios','error');return;}
+  const payload={title,body,category:$('pe-category').value||null,isGlobal:$('pe-global').value==='true',isActive:isOn('pe-toggle-active')};
+  let res;
+  if(activePromptId) res=await apiFetch(`/admin/prompts/${activePromptId}`,{method:'PATCH',body:JSON.stringify(payload)});
+  else               res=await apiFetch('/admin/prompts',{method:'POST',body:JSON.stringify(payload)});
+  if(res?.id||res?.title){activePromptId=res.id||activePromptId;showToast(activePromptId&&payload.title?'Prompt actualizado':'Prompt creado');loadPrompts();}
+  else showToast(res?.error||'Error al guardar','error');
+}
+
+async function deletePrompt() {
+  if(!activePromptId) return;
+  if(!confirm('¿Desactivar este prompt? (no se elimina físicamente)')) return;
+  await apiFetch(`/admin/prompts/${activePromptId}`,{method:'DELETE'});
+  activePromptId=null;
+  $('pe-empty').style.display='flex';
+  $('pe-form').style.display='none';
+  loadPrompts();
+  showToast('Prompt desactivado');
+}
+
+// ─── LOGS ─────────────────────────────────────────────────────────────────────
+let logsPage=1;
+
+async function loadLogs(page) {
+  logsPage=page||logsPage;
+  const tbody=$('logs-tbody');
+  if(tbody) tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Cargando...</td></tr>';
+  const action=$('logs-search')?.value||'', tenantId=$('logs-tenant')?.value||'', userId=$('logs-user')?.value||'';
+  const params=new URLSearchParams({page:logsPage,limit:20});
+  if(action) params.set('action',action);
+  if(tenantId) params.set('tenantId',tenantId);
+  if(userId) params.set('userId',userId);
+  const tsel=$('logs-tenant');
+  if(tsel&&tsel.options.length<=1){
+    apiFetch('/admin/tenants?limit=100').then(td=>{
+      if(!td) return;
+      td.data.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;tsel.appendChild(o);});
+    });
+  }
+  const data=await apiFetch(`/admin/logs?${params}`); if(!data) return;
+  const bm={TENANT_CREATED:'lb-ok',PROMPT_CREATED:'lb-config',PROMPT_UPDATED:'lb-config',TENANT_SUSPENDED:'lb-error',AUTH_LOGIN:'lb-ok'};
+  if(tbody) tbody.innerHTML=!data.data.length
+    ?'<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px">Sin registros</td></tr>'
+    :data.data.map(l=>{
+        const ts=new Date(l.createdAt).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+        const badge=bm[l.action]||'lb-info';
+        return `<tr><td style="font-size:11px;color:var(--text-tertiary);white-space:nowrap">${ts}</td><td><span class="log-badge ${badge}">${l.action}</span></td><td style="font-size:12px">${l.entity||'—'}</td><td style="font-size:11px;font-family:monospace;color:var(--text-tertiary)">${l.entityId?l.entityId.slice(0,12)+'…':'—'}</td><td style="font-size:11px;color:var(--text-secondary)">${l.tenantId?l.tenantId.slice(0,8)+'…':'—'}</td><td style="font-size:11px;color:var(--text-secondary)">${l.userId?l.userId.slice(0,8)+'…':'—'}</td></tr>`;
+      }).join('');
+  setT('logs-count',`Mostrando ${data.data.length} de ${data.pagination.total} registros`);
+  const pagEl=$('logs-pag');
+  if(pagEl){
+    const tot=data.pagination.pages;
+    let h='';
+    for(let i=1;i<=Math.min(tot,5);i++) h+=`<button class="pag-btn${i===logsPage?' active':''}" onclick="loadLogs(${i})">${i}</button>`;
+    if(tot>5) h+=`<button class="pag-btn" onclick="loadLogs(${tot})">→ ${tot}</button>`;
+    pagEl.innerHTML=h;
+  }
+}
+
+// ─── CONFIG: ADMIN USERS ─────────────────────────────────────────────────────
+async function loadAdminUsers() {
+  const data=await apiFetch('/admin/users?limit=50'); if(!data) return;
+  const admins=data.data.filter(u=>u.role==='SUPERADMIN'||!u.tenantId);
+  const tbody=$('admin-users-tbody'); if(!tbody) return;
+  tbody.innerHTML=admins.length
+    ?admins.map(u=>`<tr><td style="font-size:12px">${u.email}</td><td style="font-size:12px">${u.name||'—'}</td><td><span class="badge badge-active">${u.role}</span></td><td><span class="badge ${u.isActive?'badge-ok':'badge-pause'}">${u.isActive?'Activo':'Inactivo'}</span></td><td><button class="act red" onclick="toggleUserActive('${u.id}',${u.isActive})">${u.isActive?'Desactivar':'Activar'}</button></td></tr>`).join('')
+    :'<tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);padding:12px">Sin usuarios admin</td></tr>';
+}
+
+async function toggleUserActive(id, currentlyActive) {
+  if(currentlyActive&&!confirm('¿Desactivar este usuario?')) return;
+  await apiFetch(`/admin/users/${id}`,{method:'PATCH',body:JSON.stringify({isActive:!currentlyActive})});
+  loadAdminUsers();
+  showToast(currentlyActive?'Usuario desactivado':'Usuario reactivado');
+}
+
+function openNewAdminModal() {
+  ['na-email','na-name','na-password'].forEach(id=>setV(id,''));
+  $('na-error').style.display='none';
+  openModal('modal-new-admin');
+}
+
+async function createAdmin() {
+  const errEl=$('na-error'), btn=document.querySelector('#modal-new-admin .btn-primary');
+  errEl.style.display='none';
+  const email=$('na-email').value.trim(), name=$('na-name').value.trim(), password=$('na-password').value;
+  if(!email||!name||!password){errEl.textContent='Todos los campos son obligatorios';errEl.style.display='block';return;}
+  if(password.length<8){errEl.textContent='La contraseña debe tener al menos 8 caracteres';errEl.style.display='block';return;}
+  btn.textContent='Creando...';btn.disabled=true;
+  const res=await apiFetch('/admin/users',{method:'POST',body:JSON.stringify({email,name,password,role:'SUPERADMIN'})});
+  btn.textContent='Crear administrador';btn.disabled=false;
+  if(res?.id){closeModal('modal-new-admin');loadAdminUsers();showToast(`Administrador "${name}" creado`);}
+  else{errEl.textContent=res?.error||'Error al crear';errEl.style.display='block';}
+}
+
+// ─── CONFIG: PLANS ────────────────────────────────────────────────────────────
+async function loadPlansTable() {
+  const plans=await getPlans();
+  const tbody=$('plans-tbody'); if(!tbody) return;
+  tbody.innerHTML=plans.length
+    ?plans.map(p=>`<tr><td style="font-weight:500">${p.name}</td><td style="font-size:11px;font-family:monospace;color:var(--text-tertiary)">${p.slug}</td><td>${p.creditLimit.toLocaleString('es-ES')}</td><td>${p.modelLimit}</td><td>${p.userLimit}</td><td>${p.priceMonthly?'€'+p.priceMonthly.toFixed(2):'Gratis'}</td><td>${p._count?.tenants??0}</td><td><span class="badge ${p.isActive?'badge-active':'badge-pause'}">${p.isActive?'Activo':'Inactivo'}</span></td><td><button class="act" onclick="togglePlan('${p.id}',${p.isActive})">${p.isActive?'Desactivar':'Activar'}</button></td></tr>`).join('')
+    :'<tr><td colspan="9" style="text-align:center;color:var(--text-tertiary);padding:16px">Sin planes</td></tr>';
+}
+
+async function togglePlan(id, active) {
+  await apiFetch(`/admin/plans/${id}`,{method:'PATCH',body:JSON.stringify({isActive:!active})});
+  plansCache=[];
+  await getPlans();
+  loadPlansTable();
+  showToast(active?'Plan desactivado':'Plan activado');
+}
+
+function openNewPlanModal() {
+  ['np-name','np-slug','np-credits','np-price','np-models','np-users'].forEach(id=>setV(id,''));
+  $('np-error').style.display='none';
+  openModal('modal-new-plan');
+}
+
+async function createPlan() {
+  const errEl=$('np-error'), btn=document.querySelector('#modal-new-plan .btn-primary');
+  errEl.style.display='none';
+  const body={name:$('np-name').value.trim(),slug:$('np-slug').value.trim().toLowerCase(),creditLimit:parseInt($('np-credits').value)||0,priceMonthly:parseFloat($('np-price').value)||0,modelLimit:parseInt($('np-models').value)||999,userLimit:parseInt($('np-users').value)||999};
+  if(!body.name||!body.slug||!body.creditLimit){errEl.textContent='Nombre, slug y créditos son obligatorios';errEl.style.display='block';return;}
+  btn.textContent='Creando...';btn.disabled=true;
+  const res=await apiFetch('/admin/plans',{method:'POST',body:JSON.stringify(body)});
+  btn.textContent='Crear plan';btn.disabled=false;
+  if(res?.id){closeModal('modal-new-plan');plansCache=[];await getPlans();loadPlansTable();showToast(`Plan "${body.name}" creado`);}
+  else{errEl.textContent=res?.error||'Error al crear';errEl.style.display='block';}
+}
+
+// ─── CONFIG: SYSTEM PROMPTS LIST ─────────────────────────────────────────────
+async function loadSystemPromptsList() {
+  const data=await apiFetch('/admin/prompts?category='); if(!data) return;
+  const active=data.filter(p=>p.isActive&&p.isGlobal!==false);
+  $('system-prompts-list').innerHTML=!active.length
+    ?'<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0">Sin prompts globales activos</div>'
+    :active.map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border-light)"><div class="pi-dot pi-dot-on"></div><span style="font-size:12px;font-weight:500">${p.title}</span><span style="font-size:10px;color:var(--text-tertiary);margin-left:auto">${p.category||'general'}</span></div>`).join('');
+}
+
+// ─── CONFIG SECTIONS ─────────────────────────────────────────────────────────
+function showConfigSection(id, el) {
+  document.querySelectorAll('.config-section').forEach(s=>s.style.display='none');
+  const t=$('cs-'+id); if(t) t.style.display='block';
+  document.querySelectorAll('.cn-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(id==='auth')          loadAdminUsers();
+  if(id==='plans')         loadPlansTable();
+  if(id==='system-prompt') loadSystemPromptsList();
+}
+
+// ─── REFRESH ──────────────────────────────────────────────────────────────────
+async function refreshAll() {
+  _dashCache=null;
+  const ap=document.querySelector('.page.active')?.id?.replace('page-','');
+  await loadDashboard(true);
+  if(ap&&ap!=='dashboard'&&pageHandlers[ap]) pageHandlers[ap]();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function initApp(){getPlans();loadDashboard();}
+
+$('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+$('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+if(token){
+  fetch(`${API}/auth/me`,{headers:{Authorization:`Bearer ${token}`}})
+    .then(r=>r.json())
+    .then(d=>{
+      if(_sessionActive) return;
+      if(d?.role==='SUPERADMIN'){_sessionActive=true;$('login-overlay').style.display='none';setUserUI(d);initApp();}
+      else if(!_sessionActive) logout();
+    })
+    .catch(()=>{if(!_sessionActive) logout();});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── PLANS ───────────────────────────────────────────────────────────────────
+
+model Plan {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  slug         String   @unique
+  creditLimit  Int
+  modelLimit   Int
+  userLimit    Int
+  priceMonthly Decimal  @db.Decimal(10, 2)
+  features     Json     @default("[]")
+  isActive     Boolean  @default(true)
+  tenants      Tenant[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── TENANTS (clients) ────────────────────────────────────────────────────────
+
+model Tenant {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  subdomain    String       @unique
+  razonSocial  String?
+  planId       String
+  plan         Plan         @relation(fields: [planId], references: [id])
+  creditLimit  Int
+  creditUsed   Int          @default(0)
+  status       TenantStatus @default(ACTIVE)
+  alertAt70    Boolean      @default(false)
+  alertAt80    Boolean      @default(true)
+  alertAt90    Boolean      @default(true)
+  suspendAt100 Boolean      @default(true)
+  gracePeriodH Int          @default(0)
+  users        User[]
+  models       AiModel[]
+  conversations Conversation[]
+  files        File[]
+  creditTx     CreditTransaction[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(USER)
+  tenantId     String?
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id])
+  isActive     Boolean  @default(true)
+  conversations Conversation[]
+  files        File[]
+  prompts      UserPrompt[]
+  refreshTokens RefreshToken[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// ─── AI MODELS (Power BI Connectors) ─────────────────────────────────────────
+
+model AiModel {
+  id              String      @id @default(cuid())
+  name            String
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id])
+  pbiWorkspaceId  String
+  pbiDatasetId    String
+  pbiReportId     String?
+  pbiClientId     String?
+  pbiClientSecret String?
+  pbiTenantId     String?
+  measures        Json        @default("[]")
+  status          ModelStatus @default(ACTIVE)
+  conversations   Conversation[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([tenantId, name])
+}
+
+// ─── SYSTEM PROMPTS (admin-managed) ──────────────────────────────────────────
+
+model SystemPrompt {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  category  String?
+  isGlobal  Boolean  @default(true)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── USER PROMPTS ─────────────────────────────────────────────────────────────
+
+model UserPrompt {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  body       String
+  isFavorite Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ─── CONVERSATIONS ────────────────────────────────────────────────────────────
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  modelId   String?
+  model     AiModel?  @relation(fields: [modelId], references: [id])
+  title     String?
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ─── MESSAGES ─────────────────────────────────────────────────────────────────
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  creditsUsed    Int          @default(0)
+  inputTokens    Int          @default(0)
+  outputTokens   Int          @default(0)
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+}
+
+// ─── FILES ────────────────────────────────────────────────────────────────────
+
+model File {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  tenantId  String
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  name      String
+  mimeType  String
+  size      Int
+  path      String
+  status    FileStatus @default(PROCESSING)
+  parsedData Json?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+// ─── CREDIT TRANSACTIONS ──────────────────────────────────────────────────────
+
+model CreditTransaction {
+  id          String        @id @default(cuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  amount      Int
+  type        CreditTxType
+  description String?
+  messageId   String?
+  createdAt   DateTime      @default(now())
+}
+
+// ─── AUDIT LOG ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  tenantId  String?
+  action    String
+  entity    String?
+  entityId  String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SUPERADMIN
+  TENANT_ADMIN
+  USER
+}
+
+enum TenantStatus {
+  ACTIVE
+  PAUSED
+  SUSPENDED
+}
+
+enum ModelStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum FileStatus {
+  PROCESSING
+  READY
+  ERROR
+}
+
+enum CreditTxType {
+  PURCHASE
+  USAGE
+  ADJUSTMENT
+  RESET
+}

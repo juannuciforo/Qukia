@@ -1,0 +1,51 @@
+{
+  "name": "qukia-backend",
+  "version": "1.0.0",
+  "description": "QUKia AI Analytics Platform — Backend API",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "db:users": "node scripts/db/list-users.js",
+    "db:tenants": "node scripts/db/list-tenants.js",
+    "db:reset-pass": "node scripts/db/reset-password.js",
+    "db:reset-credits": "node scripts/db/reset-credits.js",
+    "db:suspend": "node scripts/db/suspend-tenant.js",
+    "debug:redis": "node scripts/debug/check-redis.js",
+    "debug:env": "node scripts/debug/check-env.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "@dsnp/parquetjs": "^1.8.7",
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@prisma/client": "^5.19.0",
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "papaparse": "^5.5.3",
+    "pdf-parse": "^2.4.5",
+    "uuid": "^10.0.0",
+    "winston": "^3.14.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "prisma": "^5.19.0"
+  }
+}
