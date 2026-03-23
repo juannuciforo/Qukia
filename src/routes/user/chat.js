@@ -134,6 +134,7 @@ router.post('/confirm', async (req, res, next) => {
     });
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
 
+    const { dashboards } = req.body;
     const msg = await prisma.message.create({
       data: {
         conversationId,
@@ -142,6 +143,7 @@ router.post('/confirm', async (req, res, next) => {
         inputTokens:  inputTokens  || 0,
         outputTokens: outputTokens || 0,
         creditsUsed:  creditsUsed  || 0,
+        metadata:     dashboards?.length ? { dashboards } : undefined,
       },
     });
 

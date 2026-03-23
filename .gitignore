@@ -26,3 +26,6 @@ prisma/migrations/dev.db
 # Build
 dist/
 build/
+
+# Data
+uploads/

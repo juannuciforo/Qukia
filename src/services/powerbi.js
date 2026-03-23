@@ -211,4 +211,19 @@ async function testConnection(model) {
   }
 }
 
-module.exports = { runDaxQuery, getDatasetSchema, testConnection, getAccessToken };
+async function getSchemaIndex(model) {
+  const cacheKey = `pbi:schema-index:${model.pbiDatasetId}`;
+  const cached = await redis.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const schema = await getDatasetSchema(model);
+  const index = schema.map(t => ({
+    name: t.name,
+    measures: t.measures.map(m => m.name),
+  }));
+
+  await redis.setex(cacheKey, CACHE_TTL.LONG, JSON.stringify(index));
+  return index;
+}
+
+module.exports = { runDaxQuery, getDatasetSchema, getSchemaIndex, testConnection, getAccessToken };

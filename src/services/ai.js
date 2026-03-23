@@ -83,7 +83,9 @@ COMPORTAMIENTO PRINCIPAL:
 MODO DASHBOARD:
 Cuando el usuario pida análisis complejos (resúmenes, dashboards, KPIs, comparativas de período, rankings),
 incluí en tu respuesta un bloque JSON especial envuelto entre <<<DASHBOARD_START>>> y <<<DASHBOARD_END>>>.
-Podés incluir texto antes o después del bloque para dar contexto adicional.
+NO pongas títulos ni encabezados fuera del bloque JSON.
+El título va dentro del campo "title" del JSON.
+Podés incluir un párrafo de síntesis ejecutiva DESPUÉS del último <<<DASHBOARD_END>>>, nunca entre dashboards.
 
 El JSON debe tener esta estructura exacta:
 {
@@ -142,8 +144,10 @@ Instrucciones JSON:
 - Usá "ranking" (tabla) solo cuando necesitás mostrar muchas columnas de detalle
 - Usá "split" para comparar dos períodos (sábado vs domingo, semana vs fin de semana)
 - En "rankingBars" el campo "rawValue" debe ser el número sin formato (para calcular el ancho de la barra)
+- En rankingBars, para locales sin comparativa usar delta: "nuevo" (no "nuevo período")
 - En "split" el campo "rawValue" debe ser el número sin formato (para el mini gráfico)
 - Podés usar "rankingBars" y "ranking" juntos si querés vista visual + detalle
+- En "split", si los items tienen magnitudes muy diferentes (ej: ventas en miles vs clientes), NO uses "chart" combinado — mostrá solo los KPI cards sin gráfico, o usá series separadas con rawValue normalizado
 
 Para preguntas simples (saludos, preguntas puntuales de un solo dato), NO uses el bloque dashboard — responde en texto normal.
 
@@ -186,6 +190,46 @@ async function fetchSchema(model) {
   });
 }
 
+async function filterSchemaByQuery(query, schemaIndex) {
+  if (!schemaIndex || schemaIndex.length === 0) return [];
+  if (schemaIndex.length <= 15) return schemaIndex.map(t => t.name);
+
+  const indexText = schemaIndex.map(t => {
+    const measures = t.measures.length > 0
+      ? ` | medidas: ${t.measures.slice(0, 8).join(', ')}${t.measures.length > 8 ? '...' : ''}`
+      : '';
+    return `- ${t.name}${measures}`;
+  }).join('\n');
+
+  try {
+    const response = await client.messages.create({
+      model: MODELS.fast,
+      max_tokens: 300,
+      temperature: 0,
+      messages: [{
+        role: 'user',
+        content: `Pregunta del usuario: "${query}"
+
+Lista de tablas disponibles en el modelo de datos:
+${indexText}
+
+Devolvé SOLO un array JSON con los nombres de las tablas más relevantes para responder esta pregunta. Máximo 10 tablas. Solo el array, sin explicación.
+Ejemplo: ["Tabla1", "Tabla2", "Tabla3"]`,
+      }],
+    });
+
+    const text = response.content[0]?.text?.trim() || '[]';
+    const match = text.match(/\[[\s\S]*\]/);
+    if (!match) return schemaIndex.slice(0, 10).map(t => t.name);
+    const names = JSON.parse(match[0]);
+    logger.debug('Schema filter', { query: query.slice(0, 60), selected: names });
+    return names;
+  } catch (e) {
+    logger.warn('Schema filter failed, using full schema', { error: e.message });
+    return schemaIndex.map(t => t.name);
+  }
+}
+
 // ─── MAIN INFERENCE (streaming SSE) ──────────────────────────────────────────
 
 async function chat({ model, messages, systemPrompt, tenantId, res }) {
@@ -215,7 +259,17 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
 
   // 3. Schema
   if (model) sendSSE(res, { type: 'status', text: 'Conectando con el modelo de datos...' });
-  const schema = await fetchSchema(model);
+  let schema = await fetchSchema(model);
+  if (model && schema.length > 15) {
+    const schemaIndex = await pbiService.getSchemaIndex(model);
+    const relevantNames = await filterSchemaByQuery(lastUserMessage, schemaIndex);
+    schema = schema.filter(t => relevantNames.includes(t.name));
+    logger.debug('Schema filtered', { 
+      original: schemaIndex.length, 
+      filtered: schema.length,
+      tables: schema.map(t => t.name)
+    });
+  }
   const sysPrompt = buildSystemPrompt(model, schema, systemPrompt);
   const activeTools = model ? tools : [];
 
@@ -264,8 +318,10 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
         fullAssistantText += event.delta.text;
         // No hacer streaming token a token mientras se construye el bloque dashboard
         // para evitar que el usuario vea el JSON crudo
-        const hasDashEnd = fullAssistantText.includes('<<<DASHBOARD_END>>>');
-        const inDashboard = fullAssistantText.includes('<<<DASHBOARD_START>>>') && !hasDashEnd;
+        // Contar cuántos START y END hay para manejar múltiples dashboards
+        const countStart = (fullAssistantText.match(/<<<DASHBOARD_START>>>/g)||[]).length;
+        const countEnd = (fullAssistantText.match(/<<<DASHBOARD_END>>>/g)||[]).length;
+        const inDashboard = countStart > countEnd;
         const isDashDelimiter = event.delta.text.includes('<<<');
         if (!inDashboard && !isDashDelimiter) {
           sendSSE(res, { type: 'token', text: event.delta.text });

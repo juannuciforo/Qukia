@@ -28,10 +28,22 @@ router.get('/', async (req, res, next) => {
       prisma.aiModel.count({ where }),
     ]);
 
+    const modelIds = models.map(m => m.pbiDatasetId).filter(Boolean);
+
+    const cacheFlags = await Promise.all(
+      modelIds.map(id => redis.exists(`pbi:schema:${id}`))
+    );
+
+    const cacheMap = {};
+    modelIds.forEach((id, i) => { cacheMap[id] = cacheFlags[i] === 1; });
+
+    console.log('modelIds:', modelIds);
+    console.log('cacheMap:', cacheMap);
     res.json({
       data: models.map(m => ({
         ...m,
         pbiClientSecret: m.pbiClientSecret ? '***' : null,
+        schemaCache: m.pbiDatasetId ? cacheMap[m.pbiDatasetId] ?? false : false,
       })),
       pagination: {
         total,
@@ -163,6 +175,26 @@ router.post('/:id/test', async (req, res, next) => {
 
     const result = await powerbiService.testConnection(model);
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /admin/models/:id/sync-schema
+router.post('/:id/sync-schema', async (req, res, next) => {
+  try {
+    const model = await prisma.aiModel.findFirst({
+      where: { id: req.params.id, status: 'ACTIVE' }
+    });
+    if (!model) return res.status(404).json({ error: 'Model not found' });
+
+    await redis.del(`pbi:schema:${model.pbiDatasetId}`);
+    await redis.del(`pbi:schema-index:${model.pbiDatasetId}`);
+
+    const schema = await powerbiService.getDatasetSchema(model);
+    await powerbiService.getSchemaIndex(model);
+
+    res.json({ ok: true, tables: schema.length });
   } catch (err) {
     next(err);
   }
