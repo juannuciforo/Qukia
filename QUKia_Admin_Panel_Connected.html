@@ -11,8 +11,8 @@
     --bg-primary:#ffffff;--bg-secondary:#f9f9f8;--bg-tertiary:#f0efeb;
     --text-primary:#1a1a18;--text-secondary:#6b6b67;--text-tertiary:#9e9e9a;
     --border-light:rgba(0,0,0,0.06);--border-mid:rgba(0,0,0,0.10);--border-strong:rgba(0,0,0,0.18);
-    --brand:#F59D0D;--brand-bg:#FEF3DC;--brand-light:#FBDFA0;--brand-deep:#C47D00;
-    --amber-bg:#FAEEDA;--amber-mid:#EF9F27;--amber-dark:#633806;
+    --brand:#F05A28;--brand-bg:rgba(240,90,40,0.10);--brand-light:rgba(240,90,40,0.25);--brand-deep:#D4145A;
+    --amber-bg:#FAEEDA;--amber-mid:#EF9F27;
     --red-bg:#FCEBEB;--red-mid:#D85A30;--red-dark:#501313;
     --blue-bg:#E6F1FB;--blue-mid:#378ADD;--blue-dark:#185FA5;
     --green-bg:#EAF3DE;--green-mid:#639922;--green-dark:#3B6D11;
@@ -24,8 +24,8 @@
     --bg-primary:#212121;--bg-secondary:#2a2a2a;--bg-tertiary:#171717;
     --text-primary:#ececec;--text-secondary:#a0a0a0;--text-tertiary:#666666;
     --border-light:rgba(255,255,255,0.06);--border-mid:rgba(255,255,255,0.09);--border-strong:rgba(255,255,255,0.16);
-    --brand-bg:#2a1f08;--brand-light:#3d2e0c;--brand-deep:#fbb63a;
-    --amber-bg:#2a1f08;--amber-mid:#EF9F27;--amber-dark:#fac96a;
+    --brand-bg:rgba(240,90,40,0.15);--brand-light:rgba(240,90,40,0.30);--brand-deep:#ff6b9d;
+    --amber-bg:#2a1f08;--amber-mid:#EF9F27;
     --red-bg:#2a0e0e;--red-mid:#E06040;--red-dark:#f08060;
     --blue-bg:#0c1f33;--blue-mid:#378ADD;--blue-dark:#5ba3f0;
     --green-bg:#1a2e0a;--green-mid:#7ab832;--green-dark:#a3d455;
@@ -50,7 +50,8 @@
 
   /* ── TOPBAR ── */
   .topbar{display:flex;align-items:center;padding:0 20px;height:50px;background:var(--bg-primary);border-bottom:1px solid var(--border-light);flex-shrink:0;gap:20px;}
-  .logo{font-size:16px;font-weight:700;letter-spacing:-0.4px;flex-shrink:0;color:var(--text-primary);}
+  .logo{font-size:16px;font-weight:700;letter-spacing:-0.4px;flex-shrink:0;color:var(--text-primary);display:flex;align-items:center;gap:8px;}
+  .sb-logo-img{height:26px;margin-top:2px;}
   .logo em{color:var(--brand);font-style:normal;}
   .logo-sub{font-size:10px;font-weight:400;color:var(--text-tertiary);margin-left:6px;}
   .top-nav{display:flex;gap:2px;flex:1;}
@@ -292,12 +293,26 @@
   .lb-info{background:var(--blue-bg);color:var(--blue-dark);}
   .lb-config{background:#EDE9FE;color:#4C1D95;}
   @media(max-width:900px){.metrics-grid{grid-template-columns:1fr 1fr;}}
+
+  /* ── LOGO ── */
+  .sb-logo-img { height: 28px; display: none; }
+  .sb-logo-img-dark { display: none; }
+  html.dark .sb-logo-img-dark { display: block; }
+  html:not(.dark) .sb-logo-img:not(.sb-logo-img-dark) { display: block; }
+
+  .login-logo-img { height: 52px; margin-bottom: 5px; display: none; }
+  html.dark .login-logo-dark { display: block; }
+  html:not(.dark) .login-logo-light { display: block; }
 </style>
 </head>
 <body>
 <div class="shell">
   <div class="topbar">
-    <div class="logo">QU<em>Ki</em>a <span class="logo-sub">Admin Console · Cookdata</span></div>
+    <div class="logo">
+    <img src="assets/logo-horizontal-light.png" class="sb-logo-img" alt="QUKia">
+    <img src="assets/logo-horizontal-dark.png" class="sb-logo-img sb-logo-img-dark" alt="QUKia">
+    <span class="logo-sub">Admin Console · Cookdata</span>
+  </div>
     <nav class="top-nav">
       <div class="top-nav-item active" onclick="navigate('dashboard',this)">Dashboard</div>
       <div class="top-nav-item" onclick="navigate('clientes',this)">Clientes</div>
@@ -755,7 +770,8 @@
 
 <div id="login-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
   <div style="background:var(--bg-primary);border-radius:var(--radius-xl);padding:36px 40px;width:380px;box-shadow:var(--shadow-md);border:1px solid var(--border-light);">
-    <div style="font-size:24px;font-weight:700;letter-spacing:-1px;margin-bottom:5px">QU<span style="color:var(--brand)">Ki</span>a</div>
+    <img src="assets/logo-stacked-light.png" class="login-logo-img login-logo-light" alt="QUKia">
+    <img src="assets/logo-stacked-dark.png" class="login-logo-img login-logo-dark" alt="QUKia">
     <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:28px">Admin Console · Cookdata</div>
     <div style="margin-bottom:14px"><div class="form-label">Email</div><input id="login-email" type="email" value="admin@cookdata.io" class="form-input"></div>
     <div style="margin-bottom:22px"><div class="form-label">Contraseña</div><input id="login-password" type="password" value="changeme123" class="form-input"></div>

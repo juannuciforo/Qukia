@@ -13,7 +13,7 @@
     --bg-primary:#ffffff;--bg-secondary:#f9f9f8;--bg-tertiary:#f0efeb;
     --text-primary:#1a1a18;--text-secondary:#6b6b67;--text-tertiary:#9e9e9a;
     --border-light:rgba(0,0,0,0.06);--border-mid:rgba(0,0,0,0.10);--border-strong:rgba(0,0,0,0.18);
-    --brand:#F59D0D;--brand-bg:#FEF3DC;--brand-light:#FBDFA0;--brand-deep:#C47D00;
+    --brand:#F05A28;--brand-bg:rgba(240,90,40,0.10);--brand-light:rgba(240,90,40,0.25);--brand-deep:#D4145A;
     --amber-bg:#FAEEDA;--amber-mid:#EF9F27;
     --red-bg:#FCEBEB;--red-mid:#D85A30;
     --blue-bg:#E6F1FB;--blue-mid:#378ADD;--blue-dark:#185FA5;
@@ -26,8 +26,8 @@
     --bg-primary:#212121;--bg-secondary:#2a2a2a;--bg-tertiary:#171717;
     --text-primary:#ececec;--text-secondary:#a0a0a0;--text-tertiary:#666666;
     --border-light:rgba(255,255,255,0.06);--border-mid:rgba(255,255,255,0.09);--border-strong:rgba(255,255,255,0.16);
-    --brand-bg:#2a1f08;--brand-light:#3d2e0c;--brand-deep:#fbb63a;
-    --amber-bg:#2a1f08;--amber-mid:#EF9F27;--red-bg:#2a0e0e;--red-mid:#E06040;
+    --brand-bg:rgba(240,90,40,0.15);--brand-light:rgba(240,90,40,0.30);--brand-deep:#ff6b9d;
+    --amber-bg:#2a1f08;--amber-mid:#EF9F27;
     --blue-bg:#0c1f33;--blue-mid:#378ADD;--blue-dark:#5ba3f0;
     --shadow-sm:0 1px 3px rgba(0,0,0,0.3);--shadow-md:0 4px 12px rgba(0,0,0,0.4);
   }
@@ -303,6 +303,19 @@
   /* ── BBL ZONES ── */
   .bbl-text:empty{display:none;}
   .bbl-dashboards:empty{display:none;}
+
+  /* ── LOGO ── */
+  .sb-logo-img { height: 28px; display: none; }
+  .sb-logo-img-dark { display: none; }
+  html.dark .sb-logo-img-dark { display: block; }
+  html:not(.dark) .sb-logo-img:not(.sb-logo-img-dark) { display: block; }
+
+  .login-logo-img { height: 52px; margin-bottom: 5px; display: none; }
+  html.dark .login-logo-dark { display: block; }
+  html:not(.dark) .login-logo-light { display: block; }
+  .welcome-logo-img { height: 72px; margin-bottom: 10px; display: none; }
+  html.dark .welcome-logo-img.login-logo-dark { display: block; }
+  html:not(.dark) .welcome-logo-img.login-logo-light { display: block; }
 </style>
 </head>
 <body>
@@ -318,7 +331,8 @@
 <div class="shell">
   <aside class="sidebar">
     <div class="sb-logo">
-      <div class="sb-logo-wordmark">QU<em>Ki</em>a</div>
+      <img src="assets/logo-horizontal-light.png" class="sb-logo-img" alt="QUKia">
+      <img src="assets/logo-horizontal-dark.png" class="sb-logo-img sb-logo-img-dark" alt="QUKia">
       <div class="sb-logo-sub" id="sb-tenant-name">by Cookdata · Analytics IA</div>
     </div>
 
@@ -365,13 +379,25 @@
     <div id="sb-conversations" style="overflow-y:auto;flex:1;"><div style="padding:10px 18px;font-size:11px;color:var(--text-tertiary)">Cargando...</div></div>
 
     <div class="sb-bottom">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;position:relative">
+        <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleUserMenuUser()" title="Menú de usuario">
           <div class="user-avatar" id="sb-avatar">—</div>
           <div><div class="user-name" id="sb-user-name">—</div><div class="user-plan" id="sb-plan-name">—</div></div>
         </div>
+        <div id="user-menu-user" style="display:none;position:absolute;bottom:44px;left:0;min-width:210px;z-index:1000;background:var(--bg-primary);border:1px solid var(--border-mid);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);">
+          <div style="padding:11px 15px;font-size:11px;color:var(--text-tertiary);border-bottom:1px solid var(--border-light)" id="user-menu-email">—</div>
+          <div style="padding:10px 15px 6px;font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.6px;font-weight:600">Apariencia</div>
+          <div style="padding:6px 15px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-light)">
+            <span style="font-size:12px;color:var(--text-secondary)">Modo oscuro</span>
+            <div class="dark-toggle" onclick="event.stopPropagation();toggleDark()">
+              <div class="dark-toggle-track" id="dark-track"><div class="dark-toggle-thumb"></div></div>
+            </div>
+          </div>
+          <div style="padding:9px 15px;font-size:12.5px;cursor:pointer;color:var(--text-secondary);transition:background .1s" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''" onclick="navigate('cuenta')">Mi cuenta</div>
+          <div style="padding:9px 15px;font-size:12.5px;color:var(--red-mid);cursor:pointer;border-top:1px solid var(--border-light);transition:background .1s" onmouseover="this.style.background='var(--red-bg)'" onmouseout="this.style.background=''" onclick="logout()">Cerrar sesión</div>
+        </div>
         <div class="dark-toggle" onclick="toggleDark()" title="Modo oscuro">
-          <div class="dark-toggle-track" id="dark-track"><div class="dark-toggle-thumb"></div></div>
+          <div class="dark-toggle-track" id="dark-track-sb"><div class="dark-toggle-thumb"></div></div>
         </div>
       </div>
       <div class="credit-bar-wrap">
@@ -398,7 +424,8 @@
     <!-- PAGE: CHAT WELCOME -->
     <div id="page-chat" class="page active" style="flex-direction:column">
       <div class="chat-welcome">
-        <div class="welcome-logo">QU<em>Ki</em>a</div>
+        <img src="assets/logo-stacked-light.png" class="welcome-logo-img login-logo-light" alt="QUKia">
+        <img src="assets/logo-stacked-dark.png" class="welcome-logo-img login-logo-dark" alt="QUKia">
         <div class="welcome-sub" id="welcome-text">Hola. Pregúntame cualquier cosa sobre tus datos.</div>
         <div class="welcome-chips">
           <div class="wc" onclick="sendMessage('Ventas por región este trimestre')">Ventas por región este trimestre</div>
@@ -557,7 +584,8 @@
 
 <div id="login-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
   <div style="background:var(--bg-primary);border-radius:var(--radius-xl);padding:36px 40px;width:380px;box-shadow:var(--shadow-md);border:1px solid var(--border-light);">
-    <div style="font-size:24px;font-weight:700;letter-spacing:-1px;margin-bottom:5px">QU<span style="color:var(--brand)">Ki</span>a</div>
+    <img src="assets/logo-stacked-light.png" class="login-logo-img login-logo-light" alt="QUKia">
+    <img src="assets/logo-stacked-dark.png" class="login-logo-img login-logo-dark" alt="QUKia">
     <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:28px;font-weight:400">Analytics IA · by Cookdata</div>
     <div style="margin-bottom:14px"><div class="form-label">Email</div><input id="login-email" type="email" class="form-input" value="demo@demo.quikia.cookdata.io"></div>
     <div style="margin-bottom:22px"><div class="form-label">Contraseña</div><input id="login-password" type="password" class="form-input"></div>
@@ -613,6 +641,18 @@ function applyDark(on){
   document.documentElement.classList.toggle('dark',on);
   document.querySelectorAll('.dark-toggle-track').forEach(t=>t.classList.toggle('on',on));
 }
+function toggleUserMenuUser(){
+  const m=document.getElementById('user-menu-user');
+  if(m)m.style.display=m.style.display==='none'?'block':'none';
+  const email=document.getElementById('user-menu-email');
+  if(email&&userData)email.textContent=userData.email||'—';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.sb-bottom')){
+    const m=document.getElementById('user-menu-user');
+    if(m)m.style.display='none';
+  }
+});
 function toggleDark(){const d=document.documentElement.classList.contains('dark');applyDark(!d);localStorage.setItem('qukia_dark',!d?'1':'0');}
 applyDark(localStorage.getItem('qukia_dark')==='1');
 
@@ -834,7 +874,7 @@ function renderDashboard(data) {
     const isDark=document.documentElement.classList.contains('dark');
     const gridColor=isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
     const textColor=isDark?'#888':'#999';
-    const seriesColors=['#F59D0D',isDark?'#3a3a36':'#d4d4ce'];
+    const seriesColors=['#F05A28',isDark?'#3a3a36':'#d4d4ce'];
     chartHtml=`
       <div style="margin-top:20px">
         <div style="font-size:10px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">${data.chart.title||''}</div>
