@@ -310,7 +310,7 @@
   html.dark .sb-logo-img-dark { display: block; }
   html:not(.dark) .sb-logo-img:not(.sb-logo-img-dark) { display: block; }
 
-  .login-logo-img { height: 52px; margin-bottom: 5px; display: none; }
+  .login-logo-img { height: 36px; margin-bottom: 14px; display: none; }
   html.dark .login-logo-dark { display: block; }
   html:not(.dark) .login-logo-light { display: block; }
   .welcome-logo-img { height: 72px; margin-bottom: 10px; display: none; }
@@ -424,8 +424,8 @@
     <!-- PAGE: CHAT WELCOME -->
     <div id="page-chat" class="page active" style="flex-direction:column">
       <div class="chat-welcome">
-        <img src="assets/logo-stacked-light.png" class="welcome-logo-img login-logo-light" alt="QUKia">
-        <img src="assets/logo-stacked-dark.png" class="welcome-logo-img login-logo-dark" alt="QUKia">
+        <img src="assets/logo-horizontal-light.png" class="welcome-logo-img login-logo-light" alt="QUKia">
+        <img src="assets/logo-horizontal-dark.png" class="welcome-logo-img login-logo-dark" alt="QUKia">
         <div class="welcome-sub" id="welcome-text">Hola. Pregúntame cualquier cosa sobre tus datos.</div>
         <div class="welcome-chips">
           <div class="wc" onclick="sendMessage('Ventas por región este trimestre')">Ventas por región este trimestre</div>
@@ -584,8 +584,8 @@
 
 <div id="login-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
   <div style="background:var(--bg-primary);border-radius:var(--radius-xl);padding:36px 40px;width:380px;box-shadow:var(--shadow-md);border:1px solid var(--border-light);">
-    <img src="assets/logo-stacked-light.png" class="login-logo-img login-logo-light" alt="QUKia">
-    <img src="assets/logo-stacked-dark.png" class="login-logo-img login-logo-dark" alt="QUKia">
+    <img src="assets/logo-horizontal-light.png" class="login-logo-img login-logo-light" alt="QUKia">
+    <img src="assets/logo-horizontal-dark.png" class="login-logo-img login-logo-dark" alt="QUKia">
     <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:28px;font-weight:400">Analytics IA · by Cookdata</div>
     <div style="margin-bottom:14px"><div class="form-label">Email</div><input id="login-email" type="email" class="form-input" value="demo@demo.quikia.cookdata.io"></div>
     <div style="margin-bottom:22px"><div class="form-label">Contraseña</div><input id="login-password" type="password" class="form-input"></div>

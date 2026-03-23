@@ -12,7 +12,7 @@ Backend para la plataforma QUKia — chat de IA analítico sobre modelos Power B
 | Framework | Express 4 |
 | ORM / DB | Prisma + PostgreSQL 16 |
 | Cache | Redis 7 |
-| AI | Anthropic SDK (claude-sonnet-4) |
+| AI | Anthropic SDK (claude-sonnet-4-6) |
 | Datos | Power BI REST API + DAX |
 | Auth | JWT (access 15min + refresh 7d) |
 
