@@ -31,6 +31,7 @@ const userAccount     = require('./routes/user/account');
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
 const app = express();
+app.set('trust proxy', 1);
 
 // ─── SECURITY & COMPRESSION ──────────────────────────────────────────────────
 app.use(helmet());
