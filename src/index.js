@@ -131,7 +131,7 @@ userRouter.use(resolveTenant);
 userRouter.use(assertTenantAccess);
 
 // Chat routes also go through credit check
-userRouter.use('/chat', chatLimiter, checkCredits, userChat);
+userRouter.use('/chat', chatLimiter, userChat);
 
 // Files and account do not need credit check
 userRouter.use('/files',   userFiles);

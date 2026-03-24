@@ -1,12 +1,12 @@
 const router  = require('express').Router();
 const prisma  = require('../../lib/prisma');
 const aiSvc   = require('../../services/ai');
-const { deductCredits } = require('../../middleware/credits');
+const { checkCredits, deductCredits } = require('../../middleware/credits');
 const logger  = require('../../utils/logger');
 const { generateTitle } = require('../../services/titleGenerator');
 
 // POST /user/chat/message  (streaming SSE)
-router.post('/message', async (req, res, next) => {
+router.post('/message', checkCredits, async (req, res, next) => {
   const { conversationId, modelId, message, systemPromptId } = req.body;
 
   // modelId es opcional — si no hay modelo PBI conectado se responde sin DAX
