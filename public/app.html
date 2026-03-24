@@ -309,11 +309,11 @@
   .bbl-dashboards>div{background:var(--bg-primary);}
 
   /* ── MSG ACTIONS ── */
-  .msg-actions{display:none;gap:4px;margin-top:6px;align-items:center;}
+  .msg-actions{display:none;gap:6px;margin-top:5px;align-items:center;justify-content:flex-end;}
+  .msg-act-btn{width:26px;height:26px;border:none;border-radius:6px;font-size:12px;color:var(--text-tertiary);background:transparent;cursor:pointer;font-family:inherit;transition:all .12s;display:flex;align-items:center;justify-content:center;padding:0;}
+  .msg-act-btn:hover{background:var(--bg-tertiary);color:var(--text-primary);}
   .msg-wrap:hover .msg-actions{display:flex;}
   .msg-wrap.user .msg-actions{justify-content:flex-end;}
-  .msg-act-btn{padding:3px 9px;border:1px solid var(--border-mid);border-radius:8px;font-size:10px;font-weight:500;color:var(--text-tertiary);background:transparent;cursor:pointer;font-family:inherit;transition:all .12s;}
-  .msg-act-btn:hover{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-strong);}
   
   /* ── LOGO ── */
   .sb-logo-img{height:28px;display:none;}
@@ -1076,8 +1076,8 @@ function appendMsg(role,text){
   const wrap=document.createElement('div');wrap.className='msg-wrap'+(role==='user'?' user':'');
   const initials=role==='user'?(userData?.name||'U').slice(0,2).toUpperCase():'QK';
   const bubbleContent=role==='bot'?`<div class="bbl-text">${text?renderMd(text):'<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>'}</div><div class="bbl-dashboards"></div>`:(text?renderMd(text):'');
-  const userActions=role==='user'?`<div class="msg-actions"><button class="msg-act-btn" onclick="editMsg(this)">✏ Editar</button></div>`:'';
-  const botActions=role==='bot'?`<div class="msg-actions"><button class="msg-act-btn" onclick="retryMsg()">↺ Reintentar</button></div>`:'';
+  const userActions=role==='user'?`<div class="msg-actions"><span style="font-size:10px;color:var(--text-tertiary)">${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</span><button class="msg-act-btn" title="Reintentar" onclick="retryMsg()">↺</button><button class="msg-act-btn" title="Editar" onclick="editMsg(this)">✏</button><button class="msg-act-btn" title="Copiar" onclick="navigator.clipboard.writeText(this.closest('.msg-wrap').querySelector('.bubble-user')?.innerText||'')">⧉</button></div>`:'';
+  const botActions='';
   wrap.innerHTML=`<div class="msg-avatar-sm ${role==='user'?'av-user':'av-bot'}">${initials}</div><div style="display:flex;flex-direction:column;${role==='user'?'align-items:flex-end':''}"><div class="bubble ${role==='user'?'bubble-user':'bubble-bot'}">${bubbleContent}</div>${role==='user'?userActions:botActions}</div>`;
   area.appendChild(wrap);scrollChat();return wrap.querySelector('.bubble');
 }
