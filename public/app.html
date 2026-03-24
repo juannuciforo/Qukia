@@ -1025,7 +1025,16 @@ async function sendMessage(preset){
   const botBubble=appendMsg('bot','');
   isStreaming=true;setSendDisabled(true);
   const fileIds=readyFiles.map(f=>f.fileId);clearAttached();
-  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-secondary);font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 1.4s infinite"></span><span class="bbl-status-text">Conectando...</span></div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
+  const _sid='status_'+Math.random().toString(36).slice(2,8);
+  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-secondary);font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 1.4s infinite"></span><span id="${_sid}">Conectando...</span></div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
+  const _statusMsgs=['Conectando...','Consultando Power BI...','Calculando métricas...','Procesando resultados...','Construyendo dashboard...','Casi listo...'];
+  let _smi=0;
+  clearInterval(window._statusTimer);
+  window._statusTimer=setInterval(()=>{
+    _smi=(_smi+1)%_statusMsgs.length;
+    const el=document.getElementById(_sid);
+    if(el)el.textContent=_statusMsgs[_smi];
+  },2500);
   const textZone=botBubble.querySelector('.bbl-text');const dashZone=botBubble.querySelector('.bbl-dashboards');
   let fullText='',hasDashboard=false,collectedDashboards=[];
   try{
@@ -1053,14 +1062,6 @@ async function sendMessage(preset){
           else if(evt.type==='tool_running'||evt.type==='status'){
             const s=botBubble.querySelector('.bbl-status-text');
             if(s)s.textContent=evt.text||'Procesando...';
-            clearInterval(window._statusTimer);
-            const _msgs=['Consultando Power BI...','Calculando métricas...','Procesando datos...','Construyendo dashboard...','Casi listo...'];
-            let _mi=0;
-            window._statusTimer=setInterval(()=>{
-              _mi=(_mi+1)%_msgs.length;
-              const el=botBubble.querySelector('.bbl-status-text');
-              if(el&&isStreaming)el.textContent=_msgs[_mi];
-            },3000);
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
