@@ -13,6 +13,7 @@ async function resolveTenant(req, res, next) {
   try {
     let slug = null;
     console.log('slug:', slug, 'hostname:', req.hostname);
+    console.log('user:', req.user?.id, 'tenantId:', req.user?.tenantId);
 
     // Priority 1: explicit header
     if (req.headers['x-tenant-slug']) {
