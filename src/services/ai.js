@@ -323,7 +323,12 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
   if (anthropicMessages.length > 20) {
   anthropicMessages.splice(1, anthropicMessages.length - 20);
   }
-   
+  
+  console.log('SYSTEM PROMPT LENGTH:', sysPrompt.length);
+  console.log('SYSTEM PROMPT PREVIEW:', sysPrompt.slice(0, 200));
+  console.log('ACTIVE TOOLS:', activeTools.length);
+  console.log('SCHEMA TABLES:', schema.length);
+
   while (iteration < MAX_ITERATIONS) {
     iteration++;
 
