@@ -134,8 +134,8 @@
   @keyframes pulse{0%,60%,100%{opacity:.25;transform:scale(.8);}30%{opacity:1;transform:scale(1);}}
 
   /* ── CHART CONTAINERS ── */
-  .chart-canvas-wrap{position:relative;width:100%;height:160px;overflow:hidden;}
-  .chart-canvas-wrap-lg{position:relative;width:100%;height:200px;overflow:hidden;}
+  .chart-canvas-wrap{position:relative;width:100%;height:160px;overflow:hidden;max-width:100%;}
+  .chart-canvas-wrap-lg{position:relative;width:100%;height:220px;overflow:hidden;max-width:100%;}
 
   /* ── GAUGE ── */
   .gauge-wrap{position:relative;width:110px;height:70px;flex-shrink:0;}
@@ -995,7 +995,7 @@ function renderDashboard(data){
     </div>`:''
 
   return`
-    <div style="background:var(--bg-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:20px 22px;max-width:100%;margin-bottom:14px;box-shadow:var(--shadow-sm)">
+    <div style="background:var(--bg-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:20px 22px;max-width:100%;margin-bottom:14px;box-shadow:var(--shadow-sm);overflow:hidden;">
       <div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border-light)">
         <div style="font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:-.3px">${data.title||'Dashboard'}</div>
         ${data.subtitle?`<div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;font-weight:400">${data.subtitle}</div>`:''}
