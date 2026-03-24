@@ -1025,7 +1025,7 @@ async function sendMessage(preset){
   const botBubble=appendMsg('bot','');
   isStreaming=true;setSendDisabled(true);
   const fileIds=readyFiles.map(f=>f.fileId);clearAttached();
-  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-tertiary);font-size:12px;margin-bottom:4px">Conectando...</div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
+  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-secondary);font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 1.4s infinite"></span><span class="bbl-status-text">Conectando...</span></div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
   const textZone=botBubble.querySelector('.bbl-text');const dashZone=botBubble.querySelector('.bbl-dashboards');
   let fullText='',hasDashboard=false,collectedDashboards=[];
   try{
@@ -1051,9 +1051,8 @@ async function sendMessage(preset){
           else if(evt.type==='dashboard'){hasDashboard=true;collectedDashboards.push(evt.data);dashZone.innerHTML+=renderDashboard(evt.data);scrollChat();}
           else if(evt.type==='token'){fullText+=evt.text;textZone.innerHTML=renderMd(fullText);scrollChat();}
           else if(evt.type==='tool_running'||evt.type==='status'){
-            const s=botBubble.querySelector('.bbl-status');
-            console.log('STATUS EVENT:', evt.text, '| elemento:', s);
-            if(s)s.textContent=`⚙ ${evt.text||'Procesando...'}`;
+            const s=botBubble.querySelector('.bbl-status-text');
+            if(s)s.textContent=evt.text||'Procesando...';
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
@@ -1066,7 +1065,7 @@ async function sendMessage(preset){
   }catch(err){textZone.innerHTML=`<span style="color:var(--red-mid)">Error: ${err.message}</span>`;}
   finally{
     const statusEl=botBubble.querySelector('.bbl-status');
-    if(statusEl)statusEl.textContent='';
+    if(statusEl)statusEl.style.display='none';
     isStreaming=false;setSendDisabled(false);
     if(fullText&&!hasDashboard){
       textZone.innerHTML=renderMd(fullText);
