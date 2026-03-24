@@ -1025,10 +1025,10 @@ async function sendMessage(preset){
   const botBubble=appendMsg('bot','');
   isStreaming=true;setSendDisabled(true);
   const fileIds=readyFiles.map(f=>f.fileId);clearAttached();
-  const _sid='status_'+Math.random().toString(36).slice(2,8);
+  _sid='status_'+Math.random().toString(36).slice(2,8);
   botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-secondary);font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 1.4s infinite"></span><span id="${_sid}">Conectando...</span></div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
   const _statusMsgs=['Conectando...','Realizando consultas al modelo...','Calculando métricas...','Procesando resultados...','Construyendo dashboard...','Generando últimos detalles...'];
-  let _smi=0;
+  _smi=0;
   clearInterval(window._statusTimer);
   window._statusTimer=setInterval(()=>{
     if(_smi < _statusMsgs.length-1){
@@ -1040,7 +1040,7 @@ async function sendMessage(preset){
     }
   },2500);
   const textZone=botBubble.querySelector('.bbl-text');const dashZone=botBubble.querySelector('.bbl-dashboards');
-  let fullText='',hasDashboard=false,collectedDashboards=[];
+  let fullText='',hasDashboard=false,collectedDashboards=[],_sid='',_smi=0;
   try{
     if(fileIds.length){
       textZone.innerHTML='<span style="color:var(--text-tertiary);font-size:12px">Analizando archivos...</span>';
