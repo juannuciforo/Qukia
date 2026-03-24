@@ -351,7 +351,12 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
     for await (const event of stream) {
       if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
         fullAssistantText += event.delta.text;
-        sendSSE(res, { type: 'token', text: event.delta.text });
+        const openBraces = (fullAssistantText.match(/\{/g)||[]).length;
+        const closeBraces = (fullAssistantText.match(/\}/g)||[]).length;
+        const inJson = openBraces > closeBraces;
+        if (!inJson) {
+          sendSSE(res, { type: 'token', text: event.delta.text });
+        }
       }
     }
 
