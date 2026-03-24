@@ -308,6 +308,13 @@
   .bbl-dashboards:empty{display:none;}
   .bbl-dashboards>div{background:var(--bg-primary);}
 
+  /* ── MSG ACTIONS ── */
+  .msg-actions{display:none;gap:4px;margin-top:6px;align-items:center;}
+  .msg-wrap:hover .msg-actions{display:flex;}
+  .msg-wrap.user .msg-actions{justify-content:flex-end;}
+  .msg-act-btn{padding:3px 9px;border:1px solid var(--border-mid);border-radius:8px;font-size:10px;font-weight:500;color:var(--text-tertiary);background:transparent;cursor:pointer;font-family:inherit;transition:all .12s;}
+  .msg-act-btn:hover{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-strong);}
+  
   /* ── LOGO ── */
   .sb-logo-img{height:28px;display:none;}
   .sb-logo-img-dark{display:none;}
@@ -1069,7 +1076,9 @@ function appendMsg(role,text){
   const wrap=document.createElement('div');wrap.className='msg-wrap'+(role==='user'?' user':'');
   const initials=role==='user'?(userData?.name||'U').slice(0,2).toUpperCase():'QK';
   const bubbleContent=role==='bot'?`<div class="bbl-text">${text?renderMd(text):'<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>'}</div><div class="bbl-dashboards"></div>`:(text?renderMd(text):'');
-  wrap.innerHTML=`<div class="msg-avatar-sm ${role==='user'?'av-user':'av-bot'}">${initials}</div><div class="bubble ${role==='user'?'bubble-user':'bubble-bot'}">${bubbleContent}</div>`;
+  const userActions=role==='user'?`<div class="msg-actions"><button class="msg-act-btn" onclick="editMsg(this)">✏ Editar</button></div>`:'';
+  const botActions=role==='bot'?`<div class="msg-actions"><button class="msg-act-btn" onclick="retryMsg()">↺ Reintentar</button></div>`:'';
+  wrap.innerHTML=`<div class="msg-avatar-sm ${role==='user'?'av-user':'av-bot'}">${initials}</div><div style="display:flex;flex-direction:column;${role==='user'?'align-items:flex-end':''}"><div class="bubble ${role==='user'?'bubble-user':'bubble-bot'}">${bubbleContent}</div>${role==='user'?userActions:botActions}</div>`;
   area.appendChild(wrap);scrollChat();return wrap.querySelector('.bubble');
 }
 function scrollChat(){const a=$('chat-area');if(a)a.scrollTop=a.scrollHeight;}
@@ -1194,7 +1203,34 @@ if(uz){
   uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');Array.from(e.dataTransfer.files).forEach(f=>{const inp=$('file-input');const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;uploadFile(inp);});});
   uz.addEventListener('click',triggerUpload);
 }
-
+function editMsg(btn){
+  if(isStreaming)return;
+  const bubble=btn.closest('.msg-wrap').querySelector('.bubble-user');
+  if(!bubble)return;
+  const text=bubble.innerText.trim();
+  const ta=getActiveTextarea();
+  if(ta){ta.value=text;ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,130)+'px';ta.focus();}
+  // eliminar este mensaje y el siguiente bot del DOM
+  const wrap=btn.closest('.msg-wrap');
+  const next=wrap.nextElementSibling;
+  if(next&&next.classList.contains('msg-wrap')&&!next.classList.contains('user'))next.remove();
+  wrap.remove();
+}
+function retryMsg(){
+  if(isStreaming)return;
+  const area=$('chat-area');if(!area)return;
+  // buscar el último mensaje de usuario
+  const userWraps=[...area.querySelectorAll('.msg-wrap.user')];
+  if(!userWraps.length)return;
+  const lastUser=userWraps[userWraps.length-1];
+  const text=lastUser.querySelector('.bubble-user')?.innerText.trim();
+  if(!text)return;
+  // eliminar último bot si existe
+  const botWraps=[...area.querySelectorAll('.msg-wrap:not(.user)')];
+  if(botWraps.length)botWraps[botWraps.length-1].remove();
+  lastUser.remove();
+  sendMessage(text);
+}
 async function initApp(){await loadAccountData();await loadModels();await loadConversations();await loadPrompts();}
 $('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 $('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
