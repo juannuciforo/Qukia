@@ -863,7 +863,7 @@ function renderDashboard(data){
         pointRadius:0,fill:false,tension:.35
       });
       new Chart(canvas,{type:'line',data:{labels:data.lineChart.labels||[],datasets},options:{responsive:true,maintainAspectRatio:false,layout:{padding:0},interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+(ctx.parsed.y>=1000?(ctx.parsed.y/1000).toFixed(1)+'K€':ctx.parsed.y+'€')}}},scales:{x:{grid:{display:false},ticks:{color:textColor,font:{size:10},maxTicksLimit:10}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
-    },50);
+    },150);
   }
 
   // ── GAUGE ROW — semicircular speedometers ──
@@ -1025,7 +1025,7 @@ async function sendMessage(preset){
   const botBubble=appendMsg('bot','');
   isStreaming=true;setSendDisabled(true);
   const fileIds=readyFiles.map(f=>f.fileId);clearAttached();
-  botBubble.innerHTML=`<div class="bbl-text"><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div><div class="bbl-dashboards"></div>`;
+  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-tertiary);font-size:12px;margin-bottom:6px;min-height:18px"></div><div class="bbl-text"><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div><div class="bbl-dashboards"></div>`;
   const textZone=botBubble.querySelector('.bbl-text');const dashZone=botBubble.querySelector('.bbl-dashboards');
   let fullText='',hasDashboard=false,collectedDashboards=[];
   try{
@@ -1051,13 +1051,8 @@ async function sendMessage(preset){
           else if(evt.type==='dashboard'){hasDashboard=true;collectedDashboards.push(evt.data);dashZone.innerHTML+=renderDashboard(evt.data);scrollChat();}
           else if(evt.type==='token'){fullText+=evt.text;textZone.innerHTML=renderMd(fullText);scrollChat();}
           else if(evt.type==='tool_running'||evt.type==='status'){
-            const statusEl=botBubble.querySelector('.status-msg')||(() => {
-              const s=document.createElement('div');
-              s.className='status-msg';
-              s.style.cssText='color:var(--text-tertiary);font-size:12px;margin-bottom:6px;';
-              textZone.prepend(s);return s;
-            })();
-            statusEl.textContent=`⚙ ${evt.text||evt.description||'Procesando...'}`;
+            const statusEl=botBubble.querySelector('.bbl-status');
+            if(statusEl)statusEl.textContent=`⚙ ${evt.text||evt.description||'Procesando...'}`;
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
@@ -1069,14 +1064,15 @@ async function sendMessage(preset){
     }
   }catch(err){textZone.innerHTML=`<span style="color:var(--red-mid)">Error: ${err.message}</span>`;}
   finally{
-    const statusEl=botBubble.querySelector('.status-msg');
-    if(statusEl)statusEl.remove();
+    const statusEl=botBubble.querySelector('.bbl-status');
+    if(statusEl)statusEl.textContent='';
     isStreaming=false;setSendDisabled(false);
     if(fullText){
       const cleaned = hasDashboard 
       ? fullText
-          .replace(/\{[\s\S]*"kpis"[\s\S]*\}/g, '')  // saca el JSON del dashboard
-          .replace(/<<.*?>>/g, '')                      // saca delimitadores
+          .replace(/\{[\s\S]*\}/g, '')
+          .replace(/<<.*?>>/gs, '')
+          .replace(/^.{0,200}(dashboard|construyo|completo|aquí va|aquí está).{0,100}$/gim, '')
           .replace(/^#+\s+.+$/gm, '')
           .replace(/\n{3,}/g, '\n\n')
           .trim()
