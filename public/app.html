@@ -804,9 +804,9 @@ function renderDashboard(data){
 
   // ── KPIs ──
   const kpisHtml=(data.kpis||[]).map(k=>`
-    <div style="background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:14px 16px;min-width:120px;max-width:200px;flex:1">
+    <div style="background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:14px 16px;min-width:120px;max-width:200px;flex:1;overflow:hidden;">
       <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;font-weight:600">${k.label}</div>
-      <div style="font-size:22px;font-weight:700;color:var(--text-primary);letter-spacing:-.5px;line-height:1.2">${k.value}</div>
+      <div style="font-size:22px;font-weight:700;color:var(--text-primary);letter-spacing:-.5px;line-height:1.2;word-break:break-word;">${k.value}</div>
       ${k.delta?`<div style="font-size:11px;color:${deltaColor(k.deltaType)};margin-top:4px;font-weight:500">${k.delta}${k.vs?` <span style="color:var(--text-tertiary);font-weight:400">${k.vs}</span>`:''}</div>`:''}
       ${k.sub?`<div style="font-size:10px;color:var(--text-tertiary);margin-top:3px;line-height:1.4">${k.sub}</div>`:''}
     </div>`).join('');
