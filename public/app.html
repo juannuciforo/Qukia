@@ -1064,10 +1064,11 @@ async function sendMessage(preset){
           else if(evt.type==='dashboard'){hasDashboard=true;collectedDashboards.push(evt.data);dashZone.innerHTML+=renderDashboard(evt.data);scrollChat();}
           else if(evt.type==='token'){fullText+=evt.text;textZone.innerHTML=renderMd(fullText);scrollChat();}
           else if(evt.type==='tool_running'||evt.type==='status'){
+            console.log('STATUS:', evt.text, '| _sid:', _sid, '| el:', document.getElementById(_sid));
             clearInterval(window._statusTimer);
-            _smi=_statusMsgs.length-1; // detener avance del timer
+            _smi=_statusMsgs.length-1;
             const el=document.getElementById(_sid);
-            if(el)el.textContent=evt.text||'Pensando...';
+            if(el)el.textContent=evt.text||'Procesando...';
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
