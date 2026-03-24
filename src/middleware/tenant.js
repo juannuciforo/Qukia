@@ -30,7 +30,7 @@ async function resolveTenant(req, res, next) {
     }
 
     // Priority 3: JWT tenantId
-    if (!slug && req.user?.tenantId) {
+    if (req.user?.tenantId) {
       req.tenant = await getOrSet(
         `tenant:id:${req.user.tenantId}`,
         () => prisma.tenant.findUnique({ where: { id: req.user.tenantId }, include: { plan: true } }),
