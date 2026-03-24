@@ -17,7 +17,8 @@
     "db:reset-credits": "node scripts/db/reset-credits.js",
     "db:suspend": "node scripts/db/suspend-tenant.js",
     "debug:redis": "node scripts/debug/check-redis.js",
-    "debug:env": "node scripts/debug/check-env.js"
+    "debug:env": "node scripts/debug/check-env.js",
+    "debug:flush-semantic": "node scripts/debug/flush-semantic-cache.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
