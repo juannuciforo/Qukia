@@ -1067,17 +1067,10 @@ async function sendMessage(preset){
     const statusEl=botBubble.querySelector('.bbl-status');
     if(statusEl)statusEl.textContent='';
     isStreaming=false;setSendDisabled(false);
-    if(fullText){
-      const cleaned = hasDashboard 
-      ? fullText
-          .replace(/\{[\s\S]*\}/g, '')
-          .replace(/<<.*?>>/gs, '')
-          .replace(/^.{0,200}(dashboard|construyo|completo|aquí va|aquí está).{0,100}$/gim, '')
-          .replace(/^#+\s+.+$/gm, '')
-          .replace(/\n{3,}/g, '\n\n')
-          .trim()
-      : fullText;
-      textZone.innerHTML=cleaned?renderMd(cleaned):'';
+    if(fullText&&!hasDashboard){
+      textZone.innerHTML=renderMd(fullText);
+    } else if(hasDashboard){
+      textZone.innerHTML='';
     }
     scrollChat();
   }
