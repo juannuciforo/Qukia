@@ -37,7 +37,7 @@ async function resolveTenant(req, res, next) {
       return next();
     }
 
-    if (!slug || slug === 'api' || slug === 'admin') {
+    if (!slug || slug === 'api' || slug === 'admin' || slug.includes('railway') || slug.includes('qukia-production')) {
       return next();
     }
 
