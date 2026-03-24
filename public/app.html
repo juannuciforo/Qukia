@@ -38,7 +38,8 @@
   .bubble-bot p{margin:5px 0;color:var(--text-primary);}
   .bubble-bot ul,.bubble-bot ol{padding-left:20px;margin:5px 0;}
   .bubble-bot li{margin:3px 0;}
-  .bubble-bot table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12px;border-radius:var(--radius-md);overflow:hidden;}
+  .bubble-bot table{border-collapse:collapse;width:100%;max-width:100%;margin:10px 0;font-size:12px;border-radius:var(--radius-md);overflow:hidden;}
+  .bubble-bot{overflow:hidden;}
   .bubble-bot th,.bubble-bot td{border:none;border-bottom:1px solid var(--border-light);padding:7px 12px;text-align:left;}
   .bubble-bot th{background:var(--bg-secondary);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-secondary);}
   .bubble-bot strong{font-weight:600;}
@@ -138,6 +139,10 @@
   .typing-dot:nth-child(2){animation-delay:.2s;}
   .typing-dot:nth-child(3){animation-delay:.4s;}
   @keyframes pulse{0%,60%,100%{opacity:.25;transform:scale(.8);}30%{opacity:1;transform:scale(1);}}
+
+  /* ── CHART CONTAINERS ── */
+  .chart-canvas-wrap{position:relative;width:100%;height:160px;overflow:hidden;}
+  .chart-canvas-wrap-sm{position:relative;width:140px;height:90px;overflow:hidden;flex-shrink:0;}
 
   /* ── WELCOME ── */
   .chat-welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;}
@@ -879,7 +884,7 @@ function renderDashboard(data) {
     chartHtml=`
       <div style="margin-top:20px">
         <div style="font-size:10px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">${data.chart.title||''}</div>
-        <div style="position:relative;height:160px"><canvas id="${chartId}"></canvas></div>
+        <div class="chart-canvas-wrap"><canvas id="${chartId}"></canvas></div>
         <div style="display:flex;gap:16px;margin-top:10px">
           ${(data.chart.series||[]).map((s,i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-tertiary)"><span style="width:10px;height:10px;border-radius:2px;background:${seriesColors[i]||'#888'};display:inline-block"></span>${s.label}</div>`).join('')}
         </div>
@@ -887,7 +892,7 @@ function renderDashboard(data) {
     setTimeout(()=>{
       const canvas=document.getElementById(chartId);
       if(!canvas||!window.Chart)return;
-      new Chart(canvas,{type:'bar',data:{labels:data.chart.labels||[],datasets:(data.chart.series||[]).map((s,i)=>({label:s.label,data:s.data,backgroundColor:seriesColors[i]||'#888',borderRadius:3,barPercentage:.9,categoryPercentage:.85}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+(ctx.parsed.y>=1000?(ctx.parsed.y/1000).toFixed(0)+'K€':ctx.parsed.y+'€')}}},scales:{x:{grid:{display:false},ticks:{color:textColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+      new Chart(canvas,{type:'bar',data:{labels:data.chart.labels||[],datasets:(data.chart.series||[]).map((s,i)=>({label:s.label,data:s.data,backgroundColor:seriesColors[i]||'#888',borderRadius:3,barPercentage:.9,categoryPercentage:.85}))},options:{responsive:true,maintainAspectRatio:false,layout:{padding:0},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+(ctx.parsed.y>=1000?(ctx.parsed.y/1000).toFixed(0)+'K€':ctx.parsed.y+'€')}}},scales:{x:{grid:{display:false},ticks:{color:textColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
     },50);
   }
 
@@ -959,7 +964,7 @@ function renderDashboard(data) {
                 ${it.delta?`<div style="font-size:11px;color:${deltaColor(it.deltaType||'neutral')};margin-top:4px;font-weight:500">${it.delta}</div>`:''}
               </div>`).join('')}
           </div>
-          ${items.length===2?`<div style="width:140px;height:90px;flex-shrink:0"><canvas id="${splitChartId}"></canvas></div>`:''}
+          ${items.length===2?`<div class="chart-canvas-wrap-sm"><canvas id="${splitChartId}"></canvas></div>`:''}
         </div>
       </div>`;
     if(items.length===2){
@@ -967,7 +972,7 @@ function renderDashboard(data) {
         const canvas=document.getElementById(splitChartId);
         if(!canvas||!window.Chart)return;
         const isDark2=document.documentElement.classList.contains('dark');
-        new Chart(canvas,{type:'bar',data:{labels:items.map(it=>it.label),datasets:[{data:items.map(it=>it.rawValue||0),backgroundColor:seriesColors,borderRadius:5,barPercentage:.65}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+(ctx.parsed.y>=1000?(ctx.parsed.y/1000).toFixed(0)+'K€':ctx.parsed.y+'€')}}},scales:{x:{grid:{display:false},ticks:{color:isDark2?'#666':'#999',font:{size:9}}},y:{display:false}}}});
+        new Chart(canvas,{type:'bar',data:{labels:items.map(it=>it.label),datasets:[{data:items.map(it=>it.rawValue||0),backgroundColor:seriesColors,borderRadius:5,barPercentage:.65}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:0},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+(ctx.parsed.y>=1000?(ctx.parsed.y/1000).toFixed(0)+'K€':ctx.parsed.y+'€')}}},scales:{x:{grid:{display:false},ticks:{color:isDark2?'#666':'#999',font:{size:9}}},y:{display:false}}}});
       },50);
     }
   }
