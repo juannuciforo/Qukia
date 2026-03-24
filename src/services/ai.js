@@ -385,6 +385,16 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
       })
     );
 
+    // Después de ejecutar las queries, antes del siguiente loop
+    const queryCount = toolUseBlocks.length;
+    const messages = [
+      `Analizando ${queryCount} consulta${queryCount>1?'s':''} de datos...`,
+      'Procesando resultados...',
+      'Calculando métricas...',
+      'Construyendo el dashboard...',
+    ];
+    sendSSE(res, { type: 'status', text: messages[Math.min(iteration-1, messages.length-1)] });
+    
     anthropicMessages.push({ role: 'user', content: toolResults });
   }
 

@@ -1053,6 +1053,14 @@ async function sendMessage(preset){
           else if(evt.type==='tool_running'||evt.type==='status'){
             const s=botBubble.querySelector('.bbl-status-text');
             if(s)s.textContent=evt.text||'Procesando...';
+            clearInterval(window._statusTimer);
+            const _msgs=['Consultando Power BI...','Calculando métricas...','Procesando datos...','Construyendo dashboard...','Casi listo...'];
+            let _mi=0;
+            window._statusTimer=setInterval(()=>{
+              _mi=(_mi+1)%_msgs.length;
+              const el=botBubble.querySelector('.bbl-status-text');
+              if(el&&isStreaming)el.textContent=_msgs[_mi];
+            },3000);
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
@@ -1064,6 +1072,7 @@ async function sendMessage(preset){
     }
   }catch(err){textZone.innerHTML=`<span style="color:var(--red-mid)">Error: ${err.message}</span>`;}
   finally{
+    clearInterval(window._statusTimer);
     const statusEl=botBubble.querySelector('.bbl-status');
     if(statusEl)statusEl.style.display='none';
     isStreaming=false;setSendDisabled(false);
