@@ -1026,7 +1026,7 @@ async function sendMessage(preset){
   isStreaming=true;setSendDisabled(true);
   const fileIds=readyFiles.map(f=>f.fileId);clearAttached();
   let fullText='',hasDashboard=false,collectedDashboards=[];
-  const _statusMsgs=['Conectando...','Realizando consultas al modelo...','Calculando métricas...','Procesando resultados...','Construyendo dashboard...','Generando últimos detalles...'];
+  const _statusMsgs=['Conectando...','Realizando consultas al modelo...','Calculando métricas...','Procesando resultados...','Construyendo dashboard...','Pensando...'];
   let _sid='status_'+Math.random().toString(36).slice(2,8);
   let _smi=0;
   botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-secondary);font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 1.4s infinite"></span><span id="${_sid}">Conectando...</span></div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
@@ -1067,7 +1067,7 @@ async function sendMessage(preset){
             clearInterval(window._statusTimer);
             _smi=_statusMsgs.length-1; // detener avance del timer
             const el=document.getElementById(_sid);
-            if(el)el.textContent=evt.text||'Procesando...';
+            if(el)el.textContent=evt.text||'Pensando...';
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
