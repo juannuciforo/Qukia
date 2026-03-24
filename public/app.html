@@ -1108,6 +1108,12 @@ function newChat(){
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!e.shiftKey&&(e.target.id==='main-textarea'||e.target.id==='active-textarea')){e.preventDefault();sendMessage();}
 });
+document.querySelectorAll('textarea').forEach(ta=>{
+  ta.addEventListener('input',function(){
+    this.style.height='auto';
+    this.style.height=Math.min(this.scrollHeight,130)+'px';
+  });
+});
 document.querySelectorAll('.input-box').forEach(box=>{
   box.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON'){const ta=box.querySelector('textarea');if(ta)ta.focus();}});
 });
