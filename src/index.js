@@ -34,7 +34,9 @@ const app = express();
 app.set('trust proxy', 1);
 
 // ─── SECURITY & COMPRESSION ──────────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
 app.use(compression());
 app.use(cors({
   origin: '*',
