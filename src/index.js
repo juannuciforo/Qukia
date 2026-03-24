@@ -37,13 +37,7 @@ app.set('trust proxy', 1);
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: isDev
-    ? '*'
-    : (origin, cb) => {
-        // Allow *.quikia.cookdata.io and direct API calls
-        if (!origin || /quikia\.cookdata\.io$/.test(origin)) return cb(null, true);
-        cb(new Error(`CORS: ${origin} not allowed`));
-      },
+  origin: '*',
   credentials: true,
 }));
 
@@ -83,6 +77,8 @@ app.use(
 );
 
 // ─── HEALTH ───────────────────────────────────────────────────────────────────
+app.use(express.static('public'));
+
 app.get('/health', async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
