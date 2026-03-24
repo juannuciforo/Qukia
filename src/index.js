@@ -25,7 +25,6 @@ const adminModels     = require('./routes/admin/models');
 const adminPrompts    = require('./routes/admin/prompts');
 const adminPlans      = require('./routes/admin/plans');
 const adminLogs       = require('./routes/admin/logs');
-const adminDebug      = require('./routes/admin/debug/flush-semantic');
 const userChat        = require('./routes/user/chat');
 const userFiles       = require('./routes/user/files');
 const userAccount     = require('./routes/user/account');
@@ -108,7 +107,16 @@ app.use(
     router.use('/prompts',   adminPrompts);
     router.use('/plans',     adminPlans);
     router.use('/logs',      adminLogs);
-    router.use('/debug',     adminDebug);
+    router.post('/debug/flush-semantic', async (req, res) => {
+      try {
+        const keys = await redis.keys('semantic:*');
+        if (keys.length > 0) await redis.del(keys);
+        const schemas = await redis.keys('pbi:*');
+        res.json({ deleted: keys.length, schemasPreserved: schemas.length, keys });
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+      }
+    });
     return router;
   })(express.Router())
 );
