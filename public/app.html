@@ -1025,7 +1025,7 @@ async function sendMessage(preset){
   const botBubble=appendMsg('bot','');
   isStreaming=true;setSendDisabled(true);
   const fileIds=readyFiles.map(f=>f.fileId);clearAttached();
-  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-tertiary);font-size:12px;margin-bottom:6px;min-height:18px"></div><div class="bbl-text"><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div><div class="bbl-dashboards"></div>`;
+  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-tertiary);font-size:12px;margin-bottom:4px"></div><div class="bbl-text"><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div><div class="bbl-dashboards"></div>`;
   const textZone=botBubble.querySelector('.bbl-text');const dashZone=botBubble.querySelector('.bbl-dashboards');
   let fullText='',hasDashboard=false,collectedDashboards=[];
   try{
@@ -1051,8 +1051,8 @@ async function sendMessage(preset){
           else if(evt.type==='dashboard'){hasDashboard=true;collectedDashboards.push(evt.data);dashZone.innerHTML+=renderDashboard(evt.data);scrollChat();}
           else if(evt.type==='token'){fullText+=evt.text;textZone.innerHTML=renderMd(fullText);scrollChat();}
           else if(evt.type==='tool_running'||evt.type==='status'){
-            const statusEl=botBubble.querySelector('.bbl-status');
-            if(statusEl)statusEl.textContent=`⚙ ${evt.text||evt.description||'Procesando...'}`;
+            const s=botBubble.querySelector('.bbl-status');
+            if(s)s.textContent=`⚙ ${evt.text||'Procesando...'}`;
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
@@ -1122,7 +1122,7 @@ async function loadConversation(id,el){
     const dashboards=m.metadata?.dashboards;
     if(dashboards?.length&&bubble){
       const textZone=bubble.querySelector('.bbl-text');
-      if(textZone){const cleaned=m.content.replace(/^#+\s+.+$/gm,'').replace(/\n{3,}/g,'\n\n').trim();textZone.innerHTML=cleaned?renderMd(cleaned):'';}
+      if(textZone){const cleaned=dashboards?.length?'':m.content.replace(/\n{3,}/g,'\n\n').trim();textZone.innerHTML=cleaned?renderMd(cleaned):'';}
       const dashZone=bubble.querySelector('.bbl-dashboards');
       if(dashZone)dashboards.forEach(d=>{dashZone.innerHTML+=renderDashboard(d);});
     }
