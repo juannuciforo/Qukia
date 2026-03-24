@@ -29,3 +29,6 @@ build/
 
 # Data
 uploads/
+
+backup*.sql
+reset.sql
