@@ -11,11 +11,31 @@ const DEFAULT_TTL = 60 * 60 * 4;
  * Así "¿Cómo van las ventas?" y "como van las ventas" dan el mismo hash.
  */
 function buildCacheKey(tenantId, modelId, message) {
-  const normalized = message
+  const stopwords = ['el','la','los','las','un','una','de','del','en','por','para',
+    'me','te','se','le','nos','que','con','sin','más','mas','muy','este','esta',
+    'estos','estas','mi','mis','tu','sus','hay','como','hola','buenas','podrias',
+    'podes','puedes','mostrame','mostrar','dame','dime','quiero','ver','necesito',
+    'por','favor','porfavor','porfa'];
+
+  const synonyms = {
+    'insights':'resumen','análisis':'resumen','analisis':'resumen',
+    'kpis':'resumen','métricas':'resumen','metricas':'resumen',
+    'actuales':'actual','presente':'actual','hoy':'actual',
+    'importantes':'','principales':'','precisos':'','completos':''
+  };
+
+  let normalized = message
     .toLowerCase()
     .trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // saca tildes
     .replace(/[¿?¡!.,;:]/g, '')
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, ' ')
+    .split(' ')
+    .filter(w => !stopwords.includes(w))
+    .map(w => synonyms[w] !== undefined ? synonyms[w] : w)
+    .filter(Boolean)
+    .sort() // orden alfabético — "ventas insights" == "insights ventas"
+    .join(' ');
 
   const hash = crypto
     .createHash('sha256')

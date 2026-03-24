@@ -1073,7 +1073,14 @@ async function sendMessage(preset){
     if(statusEl)statusEl.remove();
     isStreaming=false;setSendDisabled(false);
     if(fullText){
-      const cleaned=hasDashboard?fullText.replace(/^#+\s+.+$/gm,'').replace(/^.{0,120}dashboard.{0,60}$/gim,'').replace(/\n{3,}/g,'\n\n').trim():fullText;
+      const cleaned = hasDashboard 
+      ? fullText
+          .replace(/\{[\s\S]*"kpis"[\s\S]*\}/g, '')  // saca el JSON del dashboard
+          .replace(/<<.*?>>/g, '')                      // saca delimitadores
+          .replace(/^#+\s+.+$/gm, '')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim()
+      : fullText;
       textZone.innerHTML=cleaned?renderMd(cleaned):'';
     }
     scrollChat();
