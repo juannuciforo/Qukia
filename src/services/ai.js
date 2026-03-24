@@ -384,21 +384,18 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
   }
 
   // ── Detectar y emitir TODOS los dashboards FUERA del loop ───────────────────
-  if (fullAssistantText.includes('<<<DASHBOARD_START>>>')) {
-    const dashRegex = /<<<DASHBOARD_START>>>([\s\S]*?)<<<DASHBOARD_END>>>/g;
-    let dashMatch;
-    while ((dashMatch = dashRegex.exec(fullAssistantText)) !== null) {
+  if (fullAssistantText.includes('"kpis"') || fullAssistantText.includes('"title"')) {
+    const jsonMatch = fullAssistantText.match(/\{[\s\S]*"kpis"[\s\S]*\}/);
+    if (jsonMatch) {
       try {
-        const dashData = JSON.parse(dashMatch[1].trim());
-        collectedDashboards.push(dashData); // ← guardar
+        const dashData = JSON.parse(jsonMatch[0]);
+        collectedDashboards.push(dashData);
         sendSSE(res, { type: 'dashboard', data: dashData });
-      } catch (e) {
+        fullAssistantText = fullAssistantText.replace(jsonMatch[0], '').trim();
+      } catch(e) {
         logger.warn('Dashboard JSON parse failed', { error: e.message });
       }
     }
-    fullAssistantText = fullAssistantText
-      .replace(/<<<DASHBOARD_START>>>[\s\S]*?<<<DASHBOARD_END>>>/g, '')
-      .trim();
   }
 
   const totalTokens = totalInputTokens + totalOutputTokens;

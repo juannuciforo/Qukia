@@ -1050,7 +1050,15 @@ async function sendMessage(preset){
           if(evt.type==='conversation_id')activeConvId=evt.conversationId;
           else if(evt.type==='dashboard'){hasDashboard=true;collectedDashboards.push(evt.data);dashZone.innerHTML+=renderDashboard(evt.data);scrollChat();}
           else if(evt.type==='token'){fullText+=evt.text;textZone.innerHTML=renderMd(fullText);scrollChat();}
-          else if(evt.type==='tool_running'||evt.type==='status'){if(!fullText&&!hasDashboard)textZone.innerHTML=`<span style="color:var(--text-tertiary);font-size:12px">⚙ ${evt.text||evt.description||'Procesando...'}</span>`;}
+          else if(evt.type==='tool_running'||evt.type==='status'){
+            const statusEl=botBubble.querySelector('.status-msg')||(() => {
+              const s=document.createElement('div');
+              s.className='status-msg';
+              s.style.cssText='color:var(--text-tertiary);font-size:12px;margin-bottom:6px;';
+              textZone.prepend(s);return s;
+            })();
+            statusEl.textContent=`⚙ ${evt.text||evt.description||'Procesando...'}`;
+          }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
             if(activeConvId&&fullText)await apiFetch('/user/chat/confirm',{method:'POST',body:JSON.stringify({conversationId:activeConvId,content:fullText,inputTokens:evt.inputTokens||0,outputTokens:evt.outputTokens||0,creditsUsed:evt.credits||0,dashboards:collectedDashboards||[]})});
@@ -1061,6 +1069,8 @@ async function sendMessage(preset){
     }
   }catch(err){textZone.innerHTML=`<span style="color:var(--red-mid)">Error: ${err.message}</span>`;}
   finally{
+    const statusEl=botBubble.querySelector('.status-msg');
+    if(statusEl)statusEl.remove();
     isStreaming=false;setSendDisabled(false);
     if(fullText){
       const cleaned=hasDashboard?fullText.replace(/^#+\s+.+$/gm,'').replace(/^.{0,120}dashboard.{0,60}$/gim,'').replace(/\n{3,}/g,'\n\n').trim():fullText;
