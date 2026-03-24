@@ -12,6 +12,7 @@ const { getOrSet, CACHE_TTL } = require('../lib/redis');
 async function resolveTenant(req, res, next) {
   try {
     let slug = null;
+    console.log('slug:', slug, 'hostname:', req.hostname);
 
     // Priority 1: explicit header
     if (req.headers['x-tenant-slug']) {
