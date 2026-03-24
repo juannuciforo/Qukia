@@ -351,16 +351,7 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
     for await (const event of stream) {
       if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
         fullAssistantText += event.delta.text;
-        // No hacer streaming token a token mientras se construye el bloque dashboard
-        // para evitar que el usuario vea el JSON crudo
-        // Contar cuántos START y END hay para manejar múltiples dashboards
-        const countStart = (fullAssistantText.match(/<<<DASHBOARD_START>>>/g)||[]).length;
-        const countEnd = (fullAssistantText.match(/<<<DASHBOARD_END>>>/g)||[]).length;
-        const inDashboard = countStart > countEnd;
-        const isDashDelimiter = event.delta.text.includes('<<<');
-        if (!inDashboard && !isDashDelimiter) {
-          sendSSE(res, { type: 'token', text: event.delta.text });
-        }
+        sendSSE(res, { type: 'token', text: event.delta.text });
       }
     }
 
