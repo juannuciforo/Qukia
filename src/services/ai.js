@@ -320,6 +320,10 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
   const MAX_ITERATIONS = 10;
   let iteration = 0;
 
+  if (anthropicMessages.length > 20) {
+  anthropicMessages.splice(1, anthropicMessages.length - 20);
+  }
+   
   while (iteration < MAX_ITERATIONS) {
     iteration++;
 
@@ -374,7 +378,9 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
       toolUseBlocks.map(async toolUse => {
         const result = await executeTool(toolUse, model);
         sendSSE(res, { type: 'tool_result', tool: toolUse.name, preview: result.preview });
-        return { type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(result.data) };
+        const resultStr = JSON.stringify(result.data);
+        const truncated = resultStr.length > 50000 ? resultStr.slice(0, 50000) + '...[truncado]' : resultStr;
+        return { type: 'tool_result', tool_use_id: toolUse.id, content: truncated };
       })
     );
 
