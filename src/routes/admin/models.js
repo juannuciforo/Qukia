@@ -156,9 +156,8 @@ router.patch('/:id', async (req, res, next) => {
 // DELETE /admin/models/:id
 router.delete('/:id', async (req, res, next) => {
   try {
-    await prisma.aiModel.update({
+    await prisma.aiModel.delete({
       where: { id: req.params.id },
-      data: { status: 'INACTIVE' },
     });
     res.json({ ok: true });
   } catch (err) {
