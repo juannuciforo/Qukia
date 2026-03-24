@@ -11,9 +11,9 @@ redis.on('connect', () => logger.info('Redis connected'));
 redis.on('error', (err) => logger.error('Redis error', { error: err.message }));
 
 const CACHE_TTL = {
-  SHORT:  60,        // 1 minute
-  MEDIUM: 60 * 15,   // 15 minutes
-  LONG:   60 * 60,   // 1 hour
+  SHORT:  60,                    // 1 minuto
+  MEDIUM: 60 * 15,               // 15 minutos
+  LONG:   60 * 60 * 24 * 30,    // 30 días (schemas PBI)
 };
 
 async function getOrSet(key, fetchFn, ttl = CACHE_TTL.MEDIUM) {
