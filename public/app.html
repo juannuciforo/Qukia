@@ -1052,6 +1052,7 @@ async function sendMessage(preset){
           else if(evt.type==='token'){fullText+=evt.text;textZone.innerHTML=renderMd(fullText);scrollChat();}
           else if(evt.type==='tool_running'||evt.type==='status'){
             const s=botBubble.querySelector('.bbl-status');
+            console.log('STATUS EVENT:', evt.text, '| elemento:', s);
             if(s)s.textContent=`⚙ ${evt.text||'Procesando...'}`;
           }
           else if(evt.type==='done'){
