@@ -1,5 +1,7 @@
-const router = require('express').Router();
+const { Router } = require('express');
 const { redis } = require('../../../lib/redis');
+
+const router = Router();
 
 router.post('/flush-semantic', async (req, res) => {
   try {
