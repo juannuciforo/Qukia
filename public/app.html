@@ -1031,6 +1031,16 @@ async function sendMessage(preset){
   let _smi=0;
   botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-secondary);font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 1.4s infinite"></span><span id="${_sid}">Conectando...</span></div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
   const textZone=botBubble.querySelector('.bbl-text');const dashZone=botBubble.querySelector('.bbl-dashboards');
+  clearInterval(window._statusTimer);
+  window._statusTimer=setInterval(()=>{
+    if(_smi<_statusMsgs.length-1){
+      _smi++;
+      const el=document.getElementById(_sid);
+      if(el)el.textContent=_statusMsgs[_smi];
+    }else{
+      clearInterval(window._statusTimer);
+    }
+  },6000);
   try{
     if(fileIds.length){
       textZone.innerHTML='<span style="color:var(--text-tertiary);font-size:12px">Analizando archivos...</span>';
@@ -1055,8 +1065,15 @@ async function sendMessage(preset){
           else if(evt.type==='dashboard'){hasDashboard=true;collectedDashboards.push(evt.data);dashZone.innerHTML+=renderDashboard(evt.data);scrollChat();}
           else if(evt.type==='token'){fullText+=evt.text;textZone.innerHTML=renderMd(fullText);scrollChat();}
           else if(evt.type==='tool_running'||evt.type==='status'){
+            clearInterval(window._statusTimer);
             const el=document.getElementById(_sid);
-            if(el)el.textContent=evt.text||'Pensando...';
+            if(el)el.textContent=evt.text||'Procesando...';
+            setTimeout(()=>{
+              window._statusTimer=setInterval(()=>{
+                const el2=document.getElementById(_sid);
+                if(el2&&isStreaming)el2.textContent='Procesando...';
+              },8000);
+            },3000);
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
