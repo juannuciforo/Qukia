@@ -946,7 +946,7 @@ async function loadConectores(){
   tbody.innerHTML=data.data.map(m=>{
     const badge=m.status==='ACTIVE'?'<span class="badge badge-active">Activo</span>':'<span class="badge badge-pause">Inactivo</span>';
     const toggle=m.status==='ACTIVE'?`<button class="act red" onclick="toggleModel('${m.id}','INACTIVE')">Desactivar</button>`:`<button class="act green" onclick="toggleModel('${m.id}','ACTIVE')">Activar</button>`;
-    return`<tr><td style="font-weight:600">${m.name}</td><td style="font-size:11.5px;color:var(--text-secondary)">${m.tenant?.name||'—'}</td><td style="font-size:11px;font-family:monospace;color:var(--text-tertiary)">${(m.pbiDatasetId||'').slice(0,22)}…</td><td style="font-size:11.5px">${m._count?.conversations??0}</td><td>${m.schemaCache?'<span style="font-size:11px;color:var(--green-mid)">✓ En caché</span>':'<span style="font-size:11px;color:var(--text-tertiary)">— Sin caché</span>'}</td><td>${badge}</td><td><div class="row-acts"><button class="act" onclick="openDrawer('${m.tenantId}')">Ver tenant</button><button class="act" onclick="testModel('${m.id}')">Test PBI</button><button class="act" onclick="syncSchema('${m.id}')">↻ Schema</button>${toggle}</div></td></tr>`;
+    return`<tr><td style="font-weight:600">${m.name}</td><td style="font-size:11.5px;color:var(--text-secondary)">${m.tenant?.name||'—'}</td><td style="font-size:11px;font-family:monospace;color:var(--text-tertiary)">${(m.pbiDatasetId||'').slice(0,22)}…</td><td style="font-size:11.5px">${m._count?.conversations??0}</td><td>${m.schemaCache?'<span style="font-size:11px;color:var(--green-mid)">✓ En caché</span>':'<span style="font-size:11px;color:var(--text-tertiary)">— Sin caché</span>'}</td><td>${badge}</td><td><div class="row-acts"><button class="act" onclick="openDrawer('${m.tenantId}')">Ver tenant</button><button class="act" onclick="testModel('${m.id}')">Test PBI</button><button class="act" onclick="syncSchema('${m.id}')">↻ Schema</button>${toggle}<button class="act red" onclick="deleteModel('${m.id}')">Borrar</button></div></td></tr>`;
   }).join('');
 }
 async function toggleModel(id,status){await apiFetch(`/admin/models/${id}`,{method:'PATCH',body:JSON.stringify({status})});loadConectores();showToast(status==='ACTIVE'?'Modelo activado':'Modelo desactivado');}
@@ -1054,6 +1054,12 @@ if(token){
     .then(r=>r.json())
     .then(d=>{if(_sessionActive)return;if(d?.role==='SUPERADMIN'){_sessionActive=true;$('login-overlay').style.display='none';setUserUI(d);initApp();}else if(!_sessionActive)logout();})
     .catch(()=>{if(!_sessionActive)logout();});
+}
+async function deleteModel(id){
+  if(!confirm('¿Eliminar este conector? Esta acción no se puede deshacer.'))return;
+  const res=await apiFetch(`/admin/models/${id}`,{method:'DELETE'});
+  if(res?.ok){loadConectores();showToast('Conector eliminado');}
+  else showToast(res?.error||'Error al eliminar','error');
 }
 </script>
 </body>
