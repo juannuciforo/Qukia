@@ -970,7 +970,7 @@ function renderDashboard(data){
           <span style="flex-shrink:0;margin-top:1px">${alertIcon(a.level)}</span>
           <div><div style="font-size:12px;font-weight:600;color:${alertBorder(a.level)}">${a.title}</div><div style="font-size:11.5px;margin-top:3px;color:var(--text-secondary);line-height:1.5">${a.text}</div></div>
         </div>`).join('')}
-    </div>`:''s
+    </div>`:''
 
   // ── SIGNALS ──
   const signalsHtml=(data.signals||[]).length?`
@@ -1025,12 +1025,12 @@ async function sendMessage(preset){
   const botBubble=appendMsg('bot','');
   isStreaming=true;setSendDisabled(true);
   const fileIds=readyFiles.map(f=>f.fileId);clearAttached();
-  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-tertiary);font-size:12px;margin-bottom:4px">⚙ Conectando...</div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
+  botBubble.innerHTML=`<div class="bbl-status" style="color:var(--text-tertiary);font-size:12px;margin-bottom:4px">Conectando...</div><div class="bbl-text"></div><div class="bbl-dashboards"></div>`;
   const textZone=botBubble.querySelector('.bbl-text');const dashZone=botBubble.querySelector('.bbl-dashboards');
   let fullText='',hasDashboard=false,collectedDashboards=[];
   try{
     if(fileIds.length){
-      textZone.innerHTML='<span style="color:var(--text-tertiary);font-size:12px">🤖 Analizando archivos...</span>';
+      textZone.innerHTML='<span style="color:var(--text-tertiary);font-size:12px">Analizando archivos...</span>';
       const res=await apiFetch('/user/files/analyze',{method:'POST',body:JSON.stringify({fileIds,question:finalMsg,modelId:activeModelId||undefined,conversationId:activeConvId||undefined})});
       if(res?.text){fullText=res.text;if(res.conversationId)activeConvId=res.conversationId;botBubble.innerHTML=`<div class="bbl-text">${renderMd(fullText)}</div><div class="bbl-dashboards"></div>`;await loadAccountData();loadConversations();}
       else botBubble.innerHTML=`<div class="bbl-text"><span style="color:var(--red-mid)">Error: ${res?.error||'desconocido'}</span></div><div class="bbl-dashboards"></div>`;
