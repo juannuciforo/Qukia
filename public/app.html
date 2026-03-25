@@ -1104,7 +1104,7 @@ function appendMsg(role,text){
   const wrap=document.createElement('div');wrap.className='msg-wrap'+(role==='user'?' user':'');
   const initials=role==='user'?(userData?.name||'U').slice(0,2).toUpperCase():'QK';
   const bubbleContent=role==='bot'?`<div class="bbl-text">${text?renderMd(text):'<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>'}</div><div class="bbl-dashboards"></div>`:(text?renderMd(text):'');
-  const userActions=role==='user'?`<div class="msg-actions"><span style="font-size:10px;color:var(--text-tertiary)">${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</span><button class="msg-act-btn" title="Reintentar" onclick="retryMsg()">↺</button><button class="msg-act-btn" title="Editar" onclick="editMsg(this)">✏</button><button class="msg-act-btn" title="Copiar" onclick="navigator.clipboard.writeText(this.closest('.msg-wrap').querySelector('.bubble-user')?.innerText||'')">⧉</button></div>`:'';
+  const userActions=role==='user'?`<div class="msg-actions"><span style="font-size:10px;color:var(--text-tertiary)">${new Date(createdAt||Date.now()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</span><button class="msg-act-btn" title="Reintentar" onclick="retryMsg()">↺</button><button class="msg-act-btn" title="Editar" onclick="editMsg(this)">✏</button><button class="msg-act-btn" title="Copiar" onclick="navigator.clipboard.writeText(this.closest('.msg-wrap').querySelector('.bubble-user')?.innerText||'')">⧉</button></div>`:'';
   const botActions='';
   wrap.innerHTML=`<div class="msg-avatar-sm ${role==='user'?'av-user':'av-bot'}">${initials}</div><div style="display:flex;flex-direction:column;${role==='user'?'align-items:flex-end':''}"><div class="bubble ${role==='user'?'bubble-user':'bubble-bot'}">${bubbleContent}</div>${role==='user'?userActions:botActions}</div>`;
   area.appendChild(wrap);scrollChat();return wrap.querySelector('.bubble');
@@ -1140,7 +1140,7 @@ async function loadConversation(id,el){
   if(data.model?.name){setT('active-model-name',data.model.name);setT('tb-model-label',data.model.name+' · Power BI');}
   $('chat-area').innerHTML='';
   data.messages.forEach(m=>{
-    const bubble=appendMsg(m.role==='USER'?'user':'bot',m.content);
+    const bubble=appendMsg(m.role==='USER'?'user':'bot',m.content,m.createdAt);
     const dashboards=m.metadata?.dashboards;
     if(dashboards?.length&&bubble){
       const textZone=bubble.querySelector('.bbl-text');
