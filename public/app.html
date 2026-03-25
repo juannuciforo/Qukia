@@ -1099,7 +1099,7 @@ async function sendMessage(preset){
 }
 
 function setSendDisabled(d){[$('send-btn'),$('active-send-btn')].forEach(b=>{if(b)b.disabled=d;});}
-function appendMsg(role,text){
+function appendMsg(role,text,createdAt){
   const area=$('chat-area');if(!area)return document.createElement('div');
   const wrap=document.createElement('div');wrap.className='msg-wrap'+(role==='user'?' user':'');
   const initials=role==='user'?(userData?.name||'U').slice(0,2).toUpperCase():'QK';
