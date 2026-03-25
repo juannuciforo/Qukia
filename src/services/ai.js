@@ -489,15 +489,18 @@ function startSSE(res) {
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 }
 
 function sendSSE(res, payload) {
   res.write('data: ' + JSON.stringify(payload) + '\n\n');
+  if (res.flush) res.flush();
 }
 
 function endSSE(res, payload) {
   res.write('data: ' + JSON.stringify({ type: 'done', ...payload }) + '\n\n');
+  if (res.flush) res.flush();
   res.end();
 }
 
