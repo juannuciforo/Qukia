@@ -364,7 +364,11 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
         }
         
         if (!inDashboard && !inJson) {
-          sendSSE(res, { type: 'token', text: event.delta.text });
+          // No enviar tokens que sean solo símbolos de apertura de dashboard
+          const trimmed = event.delta.text.replace(/[<\s]+$/, '');
+          if (trimmed) {
+            sendSSE(res, { type: 'token', text: trimmed });
+          }
         }
       }
     }
