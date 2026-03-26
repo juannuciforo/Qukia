@@ -405,7 +405,16 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
       try {
         const dashData = JSON.parse(jsonMatch[0]);
         collectedDashboards.push(dashData);
-        sendSSE(res, { type: 'dashboard', data: dashData });
+        // Emitir secciones del dashboard de a una con delay
+        const sections = ['kpis','lineChart','chart','gaugeRow','rankingBars','ranking','split','alerts','signals','actions'];
+        sendSSE(res, { type: 'dashboard_start', title: dashData.title, subtitle: dashData.subtitle });
+        for (const section of sections) {
+          if (dashData[section] && (Array.isArray(dashData[section]) ? dashData[section].length > 0 : true)) {
+            await new Promise(r => setTimeout(r, 120));
+            sendSSE(res, { type: 'dashboard_section', section, data: dashData[section] });
+          }
+        }
+        sendSSE(res, { type: 'dashboard_end' });
         fullAssistantText = fullAssistantText.replace(jsonMatch[0], '').trim();
       } catch(e) {
         logger.warn('Dashboard JSON parse failed', { error: e.message });
