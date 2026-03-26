@@ -410,7 +410,7 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
         sendSSE(res, { type: 'dashboard_start', title: dashData.title, subtitle: dashData.subtitle });
         for (const section of sections) {
           if (dashData[section] && (Array.isArray(dashData[section]) ? dashData[section].length > 0 : true)) {
-            await new Promise(r => setTimeout(r, 120));
+            await new Promise(r => setTimeout(r, 400));
             sendSSE(res, { type: 'dashboard_section', section, data: dashData[section] });
           }
         }
