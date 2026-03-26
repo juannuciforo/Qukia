@@ -351,10 +351,18 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
     for await (const event of stream) {
       if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
         fullAssistantText += event.delta.text;
+        const wasInDashboard = (fullAssistantText.length > event.delta.text.length) && 
+          fullAssistantText.slice(0, -event.delta.text.length).includes('<<<DASHBOARD');
         const inDashboard = fullAssistantText.includes('<<<DASHBOARD');
         const openBraces = (fullAssistantText.match(/\{/g)||[]).length;
         const closeBraces = (fullAssistantText.match(/\}/g)||[]).length;
         const inJson = openBraces > closeBraces;
+        
+        // Cuando recién entramos al bloque dashboard, avisar al frontend
+        if (inDashboard && !wasInDashboard) {
+          sendSSE(res, { type: 'status', text: 'Construyendo dashboard...' });
+        }
+        
         if (!inDashboard && !inJson) {
           sendSSE(res, { type: 'token', text: event.delta.text });
         }
