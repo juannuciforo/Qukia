@@ -78,6 +78,7 @@ app.use(
   })
 );
 
+
 // ─── HEALTH ───────────────────────────────────────────────────────────────────
 app.use(express.static('public'));
 
@@ -88,6 +89,11 @@ app.get('/health', async (req, res) => {
   } catch {
     res.status(503).json({ status: 'degraded' });
   }
+});
+
+// ─── ROOT REDIRECT ────────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.redirect('/app.html');
 });
 
 // ─── AUTH (public) ────────────────────────────────────────────────────────────
