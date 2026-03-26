@@ -175,7 +175,7 @@ Instrucciones JSON:
   }
   El campo "pct" es un número entre 0 y 100. "value" es el string que se muestra en el gauge.
 
-Para saludos o preguntas de un solo dato numérico, NO uses el bloque dashboard. Para CUALQUIER otra pregunta que involucre datos de negocio, SIEMPRE usa el bloque dashboard con KPIs, gráficos y ranking.
+Solo para saludos o conversación trivial NO uses el bloque dashboard. Para CUALQUIER pregunta que involucre datos de negocio, aunque sea simple como "ventas de ayer" o "cuántos clientes hoy", SIEMPRE usa el bloque dashboard con al menos los KPIs principales.
 
 MANEJO DE ERRORES DAX:
 - Si una query falla, reescribila con sintaxis más simple antes de rendirte
