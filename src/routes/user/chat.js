@@ -125,16 +125,16 @@ router.post('/message', checkCredits, async (req, res, next) => {
 router.post('/confirm', async (req, res, next) => {
   try {
     const { conversationId, content, inputTokens, outputTokens, creditsUsed } = req.body;
-    if (!conversationId || !content) {
-      return res.status(400).json({ error: 'conversationId and content required' });
-    }
+    const { dashboards } = req.body;
+      if (!conversationId || (!content && !dashboards?.length)) {
+        return res.status(400).json({ error: 'conversationId and content required' });
+      }
 
     const conv = await prisma.conversation.findFirst({
       where: { id: conversationId, userId: req.user.sub },
     });
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
 
-    const { dashboards } = req.body;
     const msg = await prisma.message.create({
       data: {
         conversationId,
