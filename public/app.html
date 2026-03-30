@@ -1054,7 +1054,7 @@ async function sendMessage(preset){
     const res=await fetch(`${API}/user/chat/message`,{method:'POST',headers:hdrs,body:JSON.stringify({modelId:activeModelId,message:finalMsg,conversationId:activeConvId||undefined})});
     if(!res.ok){const err=await res.json();textZone.innerHTML=`<span style="color:var(--red-mid)">Error: ${err.error||'Error desconocido'}</span>`;return;}
     const reader=res.body.getReader(),decoder=new TextDecoder();
-    let buf='';
+    let buf='',donePayload=null;
     while(true){
       const{done,value}=await reader.read();if(done)break;
       buf+=decoder.decode(value,{stream:true});
@@ -1081,22 +1081,24 @@ async function sendMessage(preset){
           }
           else if(evt.type==='done'){
             lastCredits=evt.credits||0;
-            if(activeConvId&&fullText)await apiFetch('/user/chat/confirm',{method:'POST',body:JSON.stringify({conversationId:activeConvId,content:fullText,inputTokens:evt.inputTokens||0,outputTokens:evt.outputTokens||0,creditsUsed:evt.credits||0,dashboards:collectedDashboards||[]})});
-            await loadAccountData();loadConversations();
+            donePayload=evt;
           }else if(evt.type==='error')textZone.innerHTML=`<span style="color:var(--red-mid)">Error: ${evt.message}</span>`;
         }catch(e){}
       }
     }
+    if(donePayload&&activeConvId&&fullText){
+      await apiFetch('/user/chat/confirm',{method:'POST',body:JSON.stringify({conversationId:activeConvId,content:fullText,inputTokens:donePayload.inputTokens||0,outputTokens:donePayload.outputTokens||0,creditsUsed:donePayload.credits||0,dashboards:collectedDashboards||[]})});
+    }
+    await loadAccountData();loadConversations();
   }catch(err){textZone.innerHTML=`<span style="color:var(--red-mid)">Error: ${err.message}</span>`;}
   finally{
     clearInterval(window._statusTimer);
     const statusEl=botBubble.querySelector('.bbl-status');
     if(statusEl)statusEl.style.display='none';
     isStreaming=false;setSendDisabled(false);
-    if(fullText&&!hasDashboard){
-      textZone.innerHTML=renderMd(fullText);
-    } else if(hasDashboard){
-      textZone.innerHTML='';
+    if(fullText){
+      const cleaned=hasDashboard?fullText.replace(/^#+\s.+$/gm,'').replace(/\n{3,}/g,'\n\n').trim():fullText;
+      if(cleaned)textZone.innerHTML=renderMd(cleaned);
     }
     scrollChat();
   }
