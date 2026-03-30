@@ -1097,8 +1097,18 @@ async function sendMessage(preset){
     if(statusEl)statusEl.style.display='none';
     isStreaming=false;setSendDisabled(false);
     if(fullText){
-      const cleaned=hasDashboard?fullText.replace(/^#+\s.+$/gm,'').replace(/\n{3,}/g,'\n\n').trim():fullText;
-      if(cleaned)textZone.innerHTML=renderMd(cleaned);
+      if(hasDashboard){
+        // quitar delimitadores de dashboard y títulos markdown que los rodean
+        const cleaned=fullText
+          .replace(/<<<DASHBOARD_START>>>[\s\S]*?<<<DASHBOARD_END>>>/g,'')
+          .replace(/^#+\s.+$/gm,'')
+          .replace(/\n{3,}/g,'\n\n')
+          .trim();
+        if(cleaned)textZone.innerHTML=renderMd(cleaned);
+        else textZone.innerHTML='';
+      } else {
+        textZone.innerHTML=renderMd(fullText);
+      }
     }
     scrollChat();
   }
