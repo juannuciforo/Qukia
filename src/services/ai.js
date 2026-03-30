@@ -411,27 +411,17 @@ async function chat({ model, messages, systemPrompt, tenantId, res }) {
     anthropicMessages.push({ role: 'user', content: toolResults });
   }
 
-  // ── Detectar y emitir TODOS los dashboards FUERA del loop ───────────────────
-  if (fullAssistantText.includes('"kpis"') || fullAssistantText.includes('"title"')) {
-    const jsonMatch = fullAssistantText.match(/\{[\s\S]*"kpis"[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        const dashData = JSON.parse(jsonMatch[0]);
-        collectedDashboards.push(dashData);
-        // Emitir secciones del dashboard de a una con delay
-        const sections = ['kpis','lineChart','chart','gaugeRow','rankingBars','ranking','split','alerts','signals','actions'];
-        sendSSE(res, { type: 'dashboard_start', title: dashData.title, subtitle: dashData.subtitle });
-        for (const section of sections) {
-          if (dashData[section] && (Array.isArray(dashData[section]) ? dashData[section].length > 0 : true)) {
-            await new Promise(r => setTimeout(r, 400));
-            sendSSE(res, { type: 'dashboard_section', section, data: dashData[section] });
-          }
-        }
-        sendSSE(res, { type: 'dashboard_end' });
-        fullAssistantText = fullAssistantText.replace(jsonMatch[0], '').trim();
-      } catch(e) {
-        logger.warn('Dashboard JSON parse failed', { error: e.message });
-      }
+  // ── Detectar y emitir dashboards ──────────────────────────────────────────
+  const dashboardRegex = /<<<DASHBOARD_START>>>([\s\S]*?)<<<DASHBOARD_END>>>/g;
+  let match;
+  while ((match = dashboardRegex.exec(fullAssistantText)) !== null) {
+    try {
+      const jsonStr = match[1].trim();
+      const dashData = JSON.parse(jsonStr);
+      collectedDashboards.push(dashData);
+      sendSSE(res, { type: 'dashboard', data: dashData });
+    } catch(e) {
+      logger.warn('Dashboard JSON parse failed', { error: e.message });
     }
   }
 
